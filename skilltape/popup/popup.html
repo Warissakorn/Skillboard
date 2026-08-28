@@ -12,8 +12,51 @@
   </header>
 
   <main id="app">
-    <!-- Phase 2 จะเติม UI ตรงนี้ -->
+    <section class="form-section">
+      <form id="skillForm" novalidate>
+        <div class="field">
+          <label for="skillName">ชื่อ</label>
+          <input id="skillName" type="text" maxlength="100" placeholder="เช่น สรุปบทความให้กระชับ" />
+        </div>
+        <div class="field">
+          <label for="skillContent">เนื้อหา</label>
+          <textarea id="skillContent" rows="4" placeholder="วางเนื้อหา skill/prompt ที่นี่..."></textarea>
+        </div>
+        <div class="field">
+          <label for="skillCategory">หมวดหมู่</label>
+          <select id="skillCategory">
+            <option value="general">ทั่วไป</option>
+            <option value="coding">โค้ดดิ้ง</option>
+            <option value="writing">งานเขียน</option>
+            <option value="business">ธุรกิจ</option>
+          </select>
+        </div>
+        <p id="formError" class="form-error" hidden></p>
+        <button type="submit" id="saveBtn">💾 บันทึก skill</button>
+      </form>
+    </section>
+
+    <section class="search-section">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="🔍 ค้นหา skill... (เปิดใช้งานใน Phase 4)"
+        disabled
+      />
+    </section>
+
+    <section class="list-section">
+      <ul id="skillList"></ul>
+      <p id="emptyState" class="empty-state" hidden>ยังไม่มี skill ในเทปของคุณ 🎵</p>
+    </section>
+
+    <div id="toast" class="toast" hidden></div>
   </main>
+
+  <footer class="app-footer">
+    <button id="exportBtn" class="footer-btn" disabled title="เปิดใช้งานใน Phase 5">⬇️ Export</button>
+    <button id="importBtn" class="footer-btn" disabled title="เปิดใช้งานใน Phase 5">⬆️ Import</button>
+  </footer>
 
   <script src="../utils/storage.js"></script>
   <script src="popup.js"></script>
