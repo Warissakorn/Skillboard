@@ -65,6 +65,13 @@ function createSkillItem(skill) {
   const actions = document.createElement("div");
   actions.className = "skill-actions";
 
+  const useBtn = document.createElement("button");
+  useBtn.className = "icon-btn";
+  useBtn.type = "button";
+  useBtn.title = "ใช้ใน AI";
+  useBtn.textContent = "🚀";
+  useBtn.addEventListener("click", () => handleUse(skill));
+
   const copyBtn = document.createElement("button");
   copyBtn.className = "icon-btn";
   copyBtn.type = "button";
@@ -79,6 +86,7 @@ function createSkillItem(skill) {
   deleteBtn.textContent = "🗑️";
   deleteBtn.addEventListener("click", () => handleDelete(skill));
 
+  actions.appendChild(useBtn);
   actions.appendChild(copyBtn);
   actions.appendChild(deleteBtn);
 
@@ -124,6 +132,33 @@ async function handleCopy(skill) {
   } catch (e) {
     showToast("คัดลอกไม่สำเร็จ");
   }
+}
+
+async function handleUse(skill) {
+  let tab;
+  try {
+    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  } catch (e) {
+    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    return;
+  }
+
+  if (!tab || !tab.id) {
+    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    return;
+  }
+
+  chrome.tabs.sendMessage(
+    tab.id,
+    { type: "INSERT_SKILL", text: skill.content },
+    (response) => {
+      if (chrome.runtime.lastError || !response || !response.success) {
+        showToast("เปิดหน้า AI ก่อนนะ (ChatGPT หรือ Claude)");
+        return;
+      }
+      showToast("แทรกแล้ว! กด Enter เพื่อส่ง");
+    }
+  );
 }
 
 async function handleDelete(skill) {
