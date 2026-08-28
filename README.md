@@ -9,6 +9,12 @@ Chrome Extension (Manifest V3) สำหรับจัดเก็บ Skill/Pro
 **สถานะ:** พัฒนาเสร็จสมบูรณ์ พร้อมใช้งานจริงและพร้อมแพ็กสำหรับอัปโหลด
 Chrome Web Store
 
+## Screenshots
+
+| ธีมสว่าง | ธีมมืด | โหมดแก้ไข |
+|:---:|:---:|:---:|
+| ![หน้า popup ธีมสว่าง](docs/screenshots/popup-light.png) | ![หน้า popup ธีมมืด](docs/screenshots/popup-dark.png) | ![โหมดแก้ไข skill](docs/screenshots/popup-edit-mode.png) |
+
 ---
 
 ## ติดตั้ง (โหมดนักพัฒนา)
