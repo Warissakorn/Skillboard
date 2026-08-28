@@ -22,7 +22,7 @@ _(ใส่ภาพหน้าจอจริงที่นี่ก่อน
 ## โครงสร้างโปรเจกต์
 
 ```
-skilltape/
+.
 ├── manifest.json
 ├── popup/
 │   ├── popup.html
@@ -31,7 +31,8 @@ skilltape/
 ├── content/
 │   └── content.js
 ├── utils/
-│   └── storage.js
+│   ├── storage.js
+│   └── storage.test.js
 └── icons/
     ├── icon16.png
     ├── icon48.png
@@ -42,7 +43,7 @@ skilltape/
 
 1. เปิด `chrome://extensions`
 2. เปิดสวิตช์ "Developer mode" (มุมขวาบน)
-3. คลิก "Load unpacked" แล้วเลือกโฟลเดอร์ `skilltape/`
+3. คลิก "Load unpacked" แล้วเลือกโฟลเดอร์นี้ (โฟลเดอร์ที่มี `manifest.json`)
 4. ไอคอน Skilltape จะปรากฏบน toolbar
 
 ## เว็บไซต์ที่รองรับ
@@ -199,7 +200,7 @@ state ของ popup ทั้งหมดรวมไว้ที่ object �
 โปรเจกต์นี้เป็น vanilla JS ไม่มี build step จึงทดสอบผ่าน headless browser
 ตรงๆ ได้ (ตัวอย่างใช้ Playwright แต่ไม่ใช่ dependency ของโปรเจกต์):
 
-1. เปิดไฟล์ `skilltape/popup/popup.html` ในเบราว์เซอร์ (หรือโหลดผ่าน
+1. เปิดไฟล์ `popup/popup.html` ในเบราว์เซอร์ (หรือโหลดผ่าน
    extension unpacked) พร้อม mock `chrome.storage`/`chrome.tabs` หากรันนอก
    context ของ extension จริง
 2. ทดสอบ storage layer: inject `storage.js` + `storage.test.js` แล้วเรียก
@@ -220,8 +221,7 @@ state ของ popup ทั้งหมดรวมไว้ที่ object �
 ## เตรียมไฟล์สำหรับอัปโหลด Chrome Web Store
 
 ```bash
-cd skilltape
-zip -r ../skilltape-v0.1.0.zip . -x "*.test.js"
+zip -r skilltape-v0.1.0.zip . -x "*.test.js" -x ".git/*" -x "skilltape-v0.1.0.zip"
 ```
 
 ไฟล์ `skilltape-v0.1.0.zip` ที่ได้พร้อมอัปโหลดที่
