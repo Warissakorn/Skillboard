@@ -1,0 +1,62 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f1a2e;
+  --accent: #7c3aed;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17131f;
+    --fg: #f3f0fa;
+    --accent: #a78bfa;
+    --muted: #9ca3af;
+    --border: #322a44;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 380px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Segoe UI", "Noto Sans Thai", system-ui, sans-serif;
+}
+
+.app-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.tagline {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+#app {
+  padding: 16px;
+  min-height: 120px;
+}
+
+/* custom scrollbar บางๆ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
