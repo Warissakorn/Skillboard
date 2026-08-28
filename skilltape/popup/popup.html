@@ -32,7 +32,10 @@
           </select>
         </div>
         <p id="formError" class="form-error" hidden></p>
-        <button type="submit" id="saveBtn">💾 บันทึก skill</button>
+        <div class="form-actions">
+          <button type="submit" id="saveBtn">💾 บันทึก skill</button>
+          <button type="button" id="cancelEditBtn" class="footer-btn" hidden>ยกเลิกการแก้ไข</button>
+        </div>
       </form>
     </section>
 
@@ -40,14 +43,15 @@
       <input
         id="searchInput"
         type="search"
-        placeholder="🔍 ค้นหา skill... (เปิดใช้งานใน Phase 4)"
-        disabled
+        placeholder="🔍 ค้นหา skill..."
       />
+      <p id="resultCount" class="result-count"></p>
     </section>
 
     <section class="list-section">
       <ul id="skillList"></ul>
       <p id="emptyState" class="empty-state" hidden>ยังไม่มี skill ในเทปของคุณ 🎵</p>
+      <p id="noResultsState" class="empty-state" hidden>ไม่เจอ skill ที่ค้นหา 🔍</p>
     </section>
 
     <div id="toast" class="toast" hidden></div>
