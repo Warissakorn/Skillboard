@@ -7,7 +7,7 @@ Chrome Extension (Manifest V3) สำหรับจัดเก็บและ�
 
 ## สถานะโปรเจกต์
 
-กำลังพัฒนาแบบแบ่ง Phase — ปัจจุบันอยู่ที่ **Phase 4: ค้นหา + แก้ไข Skill**
+กำลังพัฒนาแบบแบ่ง Phase — ปัจจุบันอยู่ที่ **Phase 5: Export/Import และ Categories**
 
 ## โครงสร้างโปรเจกต์
 
@@ -49,7 +49,10 @@ wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็
 - `saveSkill(skill)` — สร้างใหม่ (ไม่มี id) หรืออัปเดต (มี id เดิม)
 - `updateSkill(id, patch)` — อัปเดตบางฟิลด์ตาม id
 - `deleteSkill(id)` — ลบตาม id
-- `exportJSON()` / `importJSON(jsonString)` — สำรอง/นำเข้าข้อมูล (validate schema ก่อนเสมอ)
+- `exportJSON()` — สำรองข้อมูลทั้งหมดเป็น JSON string
+- `importJSON(jsonString, { mode })` — นำเข้าข้อมูล (validate schema ก่อนเสมอ)
+  - `mode: "replace"` (ค่าเริ่มต้น) แทนที่ข้อมูลเดิมทั้งหมด
+  - `mode: "merge"` รวมกับข้อมูลเดิมโดย id ไม่ซ้ำ (id ชนกัน → ใช้รายการที่ updatedAt ใหม่กว่า)
 
 ### วิธีทดสอบ
 
@@ -70,8 +73,9 @@ wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็
 
 - ปุ่ม 🚀 Use — ส่งเนื้อหา skill ไปแทรกในช่องแชทของแท็บที่เปิดอยู่ (ChatGPT/Claude)
 - ค้นหา skill แบบ realtime (ปุ่ม ✏️ แก้ไข ด้านล่าง)
+- Export / Import ข้อมูลเป็นไฟล์ JSON, กรองตามหมวดหมู่ด้วย chip
 
-ยังไม่เปิดใช้งาน (รอ Phase ถัดไป): Export/Import + Category filter (Phase 5)
+ทุกฟีเจอร์ตามแผน Phase 0-5 พร้อมใช้งานแล้ว — เหลือ **Phase 6: ทดสอบเต็มรูปแบบ + ปรับสุดท้าย**
 
 ## Content Script (Phase 3)
 
@@ -101,7 +105,7 @@ message `{ type: "INSERT_SKILL", text }` จาก popup แล้ว:
 state ของ popup ทั้งหมดรวมไว้ที่ object เดียว (`popup.js`):
 
 ```js
-{ skills: [], editingId: null, searchTerm: "" }
+{ skills: [], editingId: null, searchTerm: "", categoryFilter: "all" }
 ```
 
 **ค้นหา**
@@ -125,3 +129,31 @@ state ของ popup ทั้งหมดรวมไว้ที่ object �
 3. กด ✏️ ที่รายการใดก็ได้ → ฟอร์มควรโหลดค่าขึ้นมาและปุ่มเปลี่ยนเป็นโหมดอัปเดต
 4. แก้ไขแล้วกดบันทึก → ต้องไม่มีรายการซ้ำ และค่าต้องอัปเดตถูกต้อง
 5. กด "ยกเลิกการแก้ไข" → ฟอร์มต้องล้างค่าและกลับสู่โหมดเพิ่มปกติ
+
+## Export / Import + Categories (Phase 5)
+
+**Export**
+- ปุ่ม ⬇️ Export → ดึง skills ทั้งหมด → สร้าง Blob → ดาวน์โหลดไฟล์
+  `skilltape-backup-YYYYMMDD.json` ผ่าน `<a download>`
+
+**Import**
+- ปุ่ม ⬆️ Import → เปิด file picker ที่ซ่อนไว้ (`accept=".json"`)
+- อ่านไฟล์ → validate schema ผ่าน `storage.js` ก่อนเสมอ
+- ถามยืนยันด้วย `confirm()`: **ตกลง** = แทนที่ข้อมูลทั้งหมด (`mode: "replace"`),
+  **ยกเลิก** = รวมกับข้อมูลเดิมโดย id ไม่ซ้ำ (`mode: "merge"`)
+- ไฟล์ผิด schema → แสดง error เป็น toast ภาษาไทย ไม่กระทบข้อมูลเดิม
+
+**Category filter**
+- แถว chip เหนือรายการ: ทั้งหมด / ทั่วไป / โค้ดดิ้ง / งานเขียน / ธุรกิจ
+- คลิก chip → กรองร่วมกับคำค้นหาแบบ AND logic พร้อมอัปเดต "พบ X skills"
+
+### วิธีทดสอบ
+
+1. เพิ่ม skill 2-3 รายการ แล้วกด Export → ควรได้ไฟล์ `.json` ที่มีข้อมูลครบ
+2. ลบ/แก้ไขข้อมูลบางส่วน แล้ว Import ไฟล์ที่ export ไว้แบบ **แทนที่** →
+   ข้อมูลต้องกลับไปตรงกับตอน export 100%
+3. เพิ่ม skill ใหม่อีกอันแล้ว Import ไฟล์เดิมแบบ **รวมกับข้อมูลเดิม** →
+   skill ใหม่ต้องไม่หาย และไม่มีรายการซ้ำ
+4. ลองเลือก chip หมวดหมู่ต่างๆ ร่วมกับพิมพ์คำค้นหา → ผลลัพธ์ต้องตรงทั้งสองเงื่อนไข
+5. ลอง Import ไฟล์ JSON ที่ผิด schema → ต้องเห็น toast แจ้ง error ภาษาไทย
+   และข้อมูลเดิมต้องไม่หาย

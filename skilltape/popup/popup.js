@@ -24,6 +24,10 @@ const els = {
   emptyState: document.getElementById("emptyState"),
   noResultsState: document.getElementById("noResultsState"),
   toast: document.getElementById("toast"),
+  categoryChips: document.getElementById("categoryChips"),
+  exportBtn: document.getElementById("exportBtn"),
+  importBtn: document.getElementById("importBtn"),
+  importFileInput: document.getElementById("importFileInput"),
 };
 
 // state ปัจจุบันของ popup ทั้งหมดรวมไว้ที่เดียว
@@ -31,6 +35,7 @@ const state = {
   skills: [],
   editingId: null,
   searchTerm: "",
+  categoryFilter: "all",
 };
 
 let toastTimer = null;
@@ -93,6 +98,11 @@ function matchesSearch(skill, term) {
     .join(" ")
     .toLowerCase();
   return haystack.includes(term.toLowerCase());
+}
+
+function matchesCategory(skill, categoryFilter) {
+  if (categoryFilter === "all") return true;
+  return skill.category === categoryFilter;
 }
 
 function createSkillItem(skill) {
@@ -165,18 +175,21 @@ function createSkillItem(skill) {
 }
 
 function render() {
-  const filtered = state.skills.filter((s) => matchesSearch(s, state.searchTerm));
+  const filtered = state.skills.filter(
+    (s) => matchesSearch(s, state.searchTerm) && matchesCategory(s, state.categoryFilter)
+  );
   const sorted = [...filtered].sort((a, b) => b.updatedAt - a.updatedAt);
 
   els.list.innerHTML = "";
 
   const hasAnySkills = state.skills.length > 0;
   const hasResults = sorted.length > 0;
+  const hasActiveFilter = Boolean(state.searchTerm) || state.categoryFilter !== "all";
 
   els.emptyState.hidden = hasAnySkills;
   els.noResultsState.hidden = !hasAnySkills || hasResults;
 
-  if (state.searchTerm) {
+  if (hasActiveFilter) {
     els.resultCount.textContent = `พบ ${sorted.length} skills`;
   } else {
     els.resultCount.textContent = "";
@@ -291,8 +304,79 @@ function handleSearchInput() {
   }, SEARCH_DEBOUNCE_MS);
 }
 
+function handleCategoryChipClick(event) {
+  const chip = event.target.closest(".chip");
+  if (!chip) return;
+
+  state.categoryFilter = chip.dataset.category;
+  for (const el of els.categoryChips.querySelectorAll(".chip")) {
+    el.classList.toggle("is-active", el === chip);
+  }
+  render();
+}
+
+function todayStamp() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}${mm}${dd}`;
+}
+
+async function handleExport() {
+  try {
+    const json = await window.SkilltapeStorage.exportJSON();
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `skilltape-backup-${todayStamp()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    showToast("Export สำเร็จ");
+  } catch (e) {
+    showToast("Export ไม่สำเร็จ");
+  }
+}
+
+function handleImportClick() {
+  els.importFileInput.click();
+}
+
+async function handleImportFileChange(event) {
+  const file = event.target.files && event.target.files[0];
+  els.importFileInput.value = ""; // ให้เลือกไฟล์เดิมซ้ำได้อีกครั้ง
+  if (!file) return;
+
+  const replaceAll = window.confirm(
+    'นำเข้าไฟล์นี้อย่างไร?\nกด "ตกลง" เพื่อแทนที่ข้อมูลทั้งหมด\nกด "ยกเลิก" เพื่อรวมกับข้อมูลเดิม (merge)'
+  );
+
+  try {
+    const text = await file.text();
+    await window.SkilltapeStorage.importJSON(text, {
+      mode: replaceAll ? "replace" : "merge",
+    });
+    if (state.editingId) {
+      exitEditMode();
+    }
+    await refresh();
+    showToast("Import สำเร็จ");
+  } catch (e) {
+    showToast(e.message || "Import ไม่สำเร็จ");
+  }
+}
+
 els.form.addEventListener("submit", handleSubmit);
 els.cancelEditBtn.addEventListener("click", exitEditMode);
 els.searchInput.addEventListener("input", handleSearchInput);
+els.categoryChips.addEventListener("click", handleCategoryChipClick);
+els.exportBtn.addEventListener("click", handleExport);
+els.importBtn.addEventListener("click", handleImportClick);
+els.importFileInput.addEventListener("change", handleImportFileChange);
 
 refresh();

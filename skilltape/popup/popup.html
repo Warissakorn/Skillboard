@@ -45,6 +45,13 @@
         type="search"
         placeholder="🔍 ค้นหา skill..."
       />
+      <div id="categoryChips" class="category-chips">
+        <button type="button" class="chip is-active" data-category="all">ทั้งหมด</button>
+        <button type="button" class="chip" data-category="general">ทั่วไป</button>
+        <button type="button" class="chip" data-category="coding">โค้ดดิ้ง</button>
+        <button type="button" class="chip" data-category="writing">งานเขียน</button>
+        <button type="button" class="chip" data-category="business">ธุรกิจ</button>
+      </div>
       <p id="resultCount" class="result-count"></p>
     </section>
 
@@ -58,8 +65,9 @@
   </main>
 
   <footer class="app-footer">
-    <button id="exportBtn" class="footer-btn" disabled title="เปิดใช้งานใน Phase 5">⬇️ Export</button>
-    <button id="importBtn" class="footer-btn" disabled title="เปิดใช้งานใน Phase 5">⬆️ Import</button>
+    <button id="exportBtn" class="footer-btn">⬇️ Export</button>
+    <button id="importBtn" class="footer-btn">⬆️ Import</button>
+    <input id="importFileInput" type="file" accept=".json,application/json" hidden />
   </footer>
 
   <script src="../utils/storage.js"></script>

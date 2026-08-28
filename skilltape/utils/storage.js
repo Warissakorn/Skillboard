@@ -179,9 +179,12 @@ function validateImportShape(data) {
 
 /**
  * import ข้อมูลจาก JSON string — validate schema ก่อนเสมอ
- * โหมดนี้จะแทนที่ข้อมูลเดิมทั้งหมด (merge จะทำใน Phase 5)
+ * mode: "replace" (ค่าเริ่มต้น) แทนที่ข้อมูลเดิมทั้งหมด
+ *       "merge" รวมกับข้อมูลเดิมโดย id ไม่ซ้ำ (ถ้า id ชนกัน ใช้รายการที่ updatedAt ใหม่กว่า)
  */
-async function importJSON(jsonString) {
+async function importJSON(jsonString, options = {}) {
+  const mode = options.mode === "merge" ? "merge" : "replace";
+
   let parsed;
   try {
     parsed = JSON.parse(jsonString);
@@ -189,9 +192,24 @@ async function importJSON(jsonString) {
     throw new Error("ไฟล์ที่นำเข้าไม่ใช่ JSON ที่ถูกต้อง");
   }
 
-  const skills = validateImportShape(parsed);
-  await writeAll(skills);
-  return skills;
+  const imported = validateImportShape(parsed);
+
+  if (mode === "replace") {
+    await writeAll(imported);
+    return imported;
+  }
+
+  const existing = await readAll();
+  const byId = new Map(existing.map((s) => [s.id, s]));
+  for (const skill of imported) {
+    const current = byId.get(skill.id);
+    if (!current || skill.updatedAt >= current.updatedAt) {
+      byId.set(skill.id, skill);
+    }
+  }
+  const merged = Array.from(byId.values());
+  await writeAll(merged);
+  return merged;
 }
 
 // เผยแพร่เป็น global object เดียว เพื่อให้ popup.js เรียกใช้ได้ตรงๆ
