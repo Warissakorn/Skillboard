@@ -7,7 +7,7 @@ Chrome Extension (Manifest V3) สำหรับจัดเก็บและ�
 
 ## สถานะโปรเจกต์
 
-กำลังพัฒนาแบบแบ่ง Phase — ปัจจุบันอยู่ที่ **Phase 0: Project Setup & Scaffolding**
+กำลังพัฒนาแบบแบ่ง Phase — ปัจจุบันอยู่ที่ **Phase 1: Storage Layer + Data Model**
 
 ## โครงสร้างโปรเจกต์
 
@@ -40,3 +40,20 @@ skilltape/
 - chat.openai.com
 - chatgpt.com
 - claude.ai
+
+## Storage Layer (`utils/storage.js`)
+
+wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็น global object `window.SkilltapeStorage`:
+
+- `getSkills()` — ดึง skill ทั้งหมด
+- `saveSkill(skill)` — สร้างใหม่ (ไม่มี id) หรืออัปเดต (มี id เดิม)
+- `updateSkill(id, patch)` — อัปเดตบางฟิลด์ตาม id
+- `deleteSkill(id)` — ลบตาม id
+- `exportJSON()` / `importJSON(jsonString)` — สำรอง/นำเข้าข้อมูล (validate schema ก่อนเสมอ)
+
+### วิธีทดสอบ
+
+1. Load unpacked แล้วเปิด popup → คลิกขวา → Inspect เพื่อเปิด DevTools ของ popup
+2. ใน Console พิมพ์ import สคริปต์ทดสอบ หรือ copy โค้ดจาก
+   `utils/storage.test.js` ไปวางใน Console
+3. เรียก `runStorageTests()` แล้วดูผลสรุปผ่าน/ไม่ผ่านของแต่ละเคส
