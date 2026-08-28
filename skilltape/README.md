@@ -7,7 +7,17 @@ Chrome Extension (Manifest V3) สำหรับจัดเก็บและ�
 
 ## สถานะโปรเจกต์
 
-กำลังพัฒนาแบบแบ่ง Phase — ปัจจุบันอยู่ที่ **Phase 5: Export/Import และ Categories**
+**เสร็จสมบูรณ์ทุก Phase (0-6)** — Production-ready พร้อมใช้งานจริง /
+พร้อมแพ็กสำหรับอัปโหลด Chrome Web Store
+
+## Screenshots
+
+_(ใส่ภาพหน้าจอจริงที่นี่ก่อนเผยแพร่ — แนะนำ: หน้าเพิ่ม skill, หน้ารายการพร้อมค้นหา/
+กรองหมวดหมู่, โหมดแก้ไข, และหน้า popup ในธีมมืด)_
+
+| ธีมสว่าง | ธีมมืด |
+|----------|--------|
+| _screenshot placeholder_ | _screenshot placeholder_ |
 
 ## โครงสร้างโปรเจกต์
 
@@ -74,8 +84,6 @@ wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็
 - ปุ่ม 🚀 Use — ส่งเนื้อหา skill ไปแทรกในช่องแชทของแท็บที่เปิดอยู่ (ChatGPT/Claude)
 - ค้นหา skill แบบ realtime (ปุ่ม ✏️ แก้ไข ด้านล่าง)
 - Export / Import ข้อมูลเป็นไฟล์ JSON, กรองตามหมวดหมู่ด้วย chip
-
-ทุกฟีเจอร์ตามแผน Phase 0-5 พร้อมใช้งานแล้ว — เหลือ **Phase 6: ทดสอบเต็มรูปแบบ + ปรับสุดท้าย**
 
 ## Content Script (Phase 3)
 
@@ -157,3 +165,65 @@ state ของ popup ทั้งหมดรวมไว้ที่ object �
 4. ลองเลือก chip หมวดหมู่ต่างๆ ร่วมกับพิมพ์คำค้นหา → ผลลัพธ์ต้องตรงทั้งสองเงื่อนไข
 5. ลอง Import ไฟล์ JSON ที่ผิด schema → ต้องเห็น toast แจ้ง error ภาษาไทย
    และข้อมูลเดิมต้องไม่หาย
+
+## ทดสอบเต็มรูปแบบ (Phase 6)
+
+### Checklist ทดสอบ
+
+**Functional**
+- [x] เพิ่ม/แก้/ลบ/ค้น/คัดลอก/ใช้ ครบทุกปุ่ม
+- [x] Export → ล้างข้อมูล → Import แบบแทนที่ → ข้อมูลกลับมาตรงกัน 100%
+- [x] `runStorageTests()` ผ่านครบ 11/11 เคส (รวมเคส import แบบเก่าและใหม่)
+
+**Compatibility**
+- [x] Content script ระบุ matches ครบ 3 โดเมน: chat.openai.com, chatgpt.com,
+  claude.ai (ตรวจสอบใน manifest.json)
+- [x] Light/Dark mode สลับด้วย `prefers-color-scheme` ถูกต้องทั้งสองธีม
+  (ดูภาพตัวอย่างในโฟลเดอร์ทดสอบ)
+- [ ] ทดสอบแทรกข้อความจริงบน ChatGPT/Claude.ai ที่ล็อกอินอยู่ — **ต้องทำโดยผู้ใช้**
+  เนื่องจากสภาพแวดล้อมนี้ไม่มีบัญชีล็อกอินจริง และ DOM ของเว็บเหล่านี้เปลี่ยนได้บ่อย
+
+**Edge cases**
+- [x] Skill เนื้อหายาว 10,000 ตัวอักษร — บันทึกและอ่านค่ากลับมาครบถ้วน
+- [x] ชื่อ/เนื้อหามี emoji, ภาษาไทย, และ HTML tag (`<script>`, `<img onerror>`)
+  — render เป็นข้อความล้วน ไม่มี tag ถูกแทรกเข้า DOM จริง ไม่มี alert ทำงาน
+- [x] ลบข้อมูลทั้งหมด → กลับสู่ empty state ถูกต้อง
+
+**Security**
+- [x] ชื่อและเนื้อหา skill render ผ่าน `textContent` เสมอ (ไม่ใช้ `innerHTML`
+  กับข้อมูลผู้ใช้ที่ไหนเลยในโค้ดทั้งโปรเจกต์) — ป้องกัน XSS ยืนยันด้วยเทสต์อัตโนมัติ
+- [x] ไม่มี `console.log` ค้างในไฟล์ production (`popup.js`, `content.js`, `storage.js`)
+
+### วิธีรันชุดทดสอบอัตโนมัติทั้งหมด (สำหรับนักพัฒนา)
+
+โปรเจกต์นี้เป็น vanilla JS ไม่มี build step จึงทดสอบผ่าน headless browser
+ตรงๆ ได้ (ตัวอย่างใช้ Playwright แต่ไม่ใช่ dependency ของโปรเจกต์):
+
+1. เปิดไฟล์ `skilltape/popup/popup.html` ในเบราว์เซอร์ (หรือโหลดผ่าน
+   extension unpacked) พร้อม mock `chrome.storage`/`chrome.tabs` หากรันนอก
+   context ของ extension จริง
+2. ทดสอบ storage layer: inject `storage.js` + `storage.test.js` แล้วเรียก
+   `runStorageTests()`
+3. ทดสอบ UI: จำลอง add/search/edit/delete/export/import ผ่าน DOM events
+   ตามรายการ "วิธีทดสอบ" ของแต่ละ Phase ด้านบน
+
+### Troubleshooting
+
+| ปัญหา | สาเหตุที่เป็นไปได้ / วิธีแก้ |
+|-------|-------------------------------|
+| กด 🚀 Use แล้วไม่มีอะไรเกิดขึ้น | ตรวจว่าแท็บที่ active อยู่เป็น chat.openai.com, chatgpt.com หรือ claude.ai และรีเฟรชหน้านั้นหลัง Load unpacked ใหม่ (content script จะฉีดหลัง reload เท่านั้น) |
+| แทรกข้อความไม่เข้าช่องแชท | DOM ของเว็บ AI อาจเปลี่ยน — ตรวจสอบ selector ใน `content/content.js` (`findChatInput`) และปรับ selector ให้ตรงกับโครงสร้างปัจจุบัน |
+| ข้อมูลหายหลัง Import | ตรวจว่าเลือกโหมดถูกต้องตอนกด confirm (ตกลง = แทนที่ทั้งหมด, ยกเลิก = รวมกับข้อมูลเดิม) |
+| Popup ไม่แสดงข้อมูลที่บันทึกไว้ | เปิด DevTools ของ popup แล้วเช็ค error ใน console, ตรวจสอบว่า permission `storage` ยังอยู่ใน manifest.json |
+| ไอคอนไม่ขึ้นหรือขึ้นเป็นสีเทา | ลอง Remove แล้ว Load unpacked ใหม่, ตรวจว่าไฟล์ icons/*.png ยังอยู่ครบ |
+
+## เตรียมไฟล์สำหรับอัปโหลด Chrome Web Store
+
+```bash
+cd skilltape
+zip -r ../skilltape-v0.1.0.zip . -x "*.test.js"
+```
+
+ไฟล์ `skilltape-v0.1.0.zip` ที่ได้พร้อมอัปโหลดที่
+[Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+(อย่าลืมอัปเดต `version` ใน `manifest.json` ก่อน build ทุกครั้งที่ปล่อยเวอร์ชันใหม่)

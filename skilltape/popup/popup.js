@@ -1,4 +1,4 @@
-// Phase 4: ค้นหา + แก้ไข skill
+// popup.js — เพิ่ม/แสดง/ค้นหา/แก้ไข/ลบ/คัดลอก/ใช้ skill และ export/import
 
 const CATEGORY_LABELS = {
   general: "ทั่วไป",
