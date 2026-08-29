@@ -4,7 +4,6 @@
   "short_name": "Skilltape",
   "version": "0.1.0",
   "description": "your mixtape of prompts — เก็บและใช้ skill/prompt ของคุณกับ AI ได้ในคลิกเดียว",
-  "default_locale": "en",
   "permissions": [
     "storage",
     "activeTab",
