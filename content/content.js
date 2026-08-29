@@ -2,7 +2,12 @@
 // รันบนทุกเว็บไซต์ (ดู manifest.json) จึงต้องเดาช่องพิมพ์ข้อความแบบทั่วไป
 // ไม่อิงโครงสร้าง DOM ของเว็บใดเว็บหนึ่งโดยเฉพาะ
 
-const CHAT_INPUT_SELECTOR = 'textarea, [contenteditable="true"], div[role="textbox"]';
+// หลายเว็บ AI (เช่น Gemini) สร้างช่องพิมพ์ด้วย Web Component + Shadow DOM ซึ่ง
+// document.querySelectorAll() ธรรมดามองไม่เห็น จึงต้องเจาะทะลุ shadow root
+// (เฉพาะ "open" mode เท่านั้นที่ script ภายนอกเข้าถึงได้ — closed mode เข้าไม่ได้
+// ตามข้อจำกัดของแพลตฟอร์ม) — เผื่อ role="textbox" ไว้ทุก tag ไม่ใช่แค่ div
+const CHAT_INPUT_SELECTOR =
+  'textarea, [contenteditable="true"], [contenteditable=""], [role="textbox"]';
 
 function isUsableInput(el) {
   if (!el || !el.matches || !el.matches(CHAT_INPUT_SELECTOR)) return false;
@@ -12,18 +17,37 @@ function isUsableInput(el) {
   return visible && !disabled;
 }
 
+function deepQuerySelectorAll(root, selector) {
+  const results = Array.from(root.querySelectorAll(selector));
+  const allElements = root.querySelectorAll("*");
+  for (const el of allElements) {
+    if (el.shadowRoot) {
+      results.push(...deepQuerySelectorAll(el.shadowRoot, selector));
+    }
+  }
+  return results;
+}
+
+function getDeepActiveElement() {
+  // document.activeElement คืนแค่ shadow host ตัวนอกสุดถ้า element ที่โฟกัส
+  // จริงอยู่ลึกเข้าไปใน shadow tree ต้องไล่ลงไปทีละชั้นด้วย shadowRoot.activeElement
+  let el = document.activeElement;
+  while (el && el.shadowRoot && el.shadowRoot.activeElement) {
+    el = el.shadowRoot.activeElement;
+  }
+  return el;
+}
+
 function findChatInput() {
   // ให้ความสำคัญกับช่องที่ผู้ใช้กำลังโฟกัสอยู่ก่อน (แม่นยำที่สุดเพราะเป็นสิ่งที่
   // ผู้ใช้เพิ่งคลิกเอง) แล้วค่อย fallback ไปหาช่องที่ใหญ่ที่สุดบนหน้าเว็บ
   // (ช่องแชทหลักมักมีขนาดใหญ่กว่าช่องค้นหา/คอมเมนต์เล็กๆ อื่นบนหน้า)
-  const active = document.activeElement;
+  const active = getDeepActiveElement();
   if (isUsableInput(active)) {
     return active;
   }
 
-  const candidates = Array.from(document.querySelectorAll(CHAT_INPUT_SELECTOR)).filter(
-    isUsableInput
-  );
+  const candidates = deepQuerySelectorAll(document, CHAT_INPUT_SELECTOR).filter(isUsableInput);
   if (candidates.length === 0) return null;
 
   candidates.sort((a, b) => {
