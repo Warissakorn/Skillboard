@@ -240,7 +240,7 @@ async function handleUse(skill) {
     { type: "INSERT_SKILL", text: skill.content },
     (response) => {
       if (chrome.runtime.lastError || !response || !response.success) {
-        showToast("เปิดหน้า AI ก่อนนะ (ChatGPT หรือ Claude)");
+        showToast("ไม่พบช่องพิมพ์ข้อความในหน้านี้ ลองเปิดหน้าแชท AI ก่อนนะ");
         return;
       }
       showToast("แทรกแล้ว! กด Enter เพื่อส่ง");
