@@ -189,9 +189,27 @@ body {
 
 .skill-item {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px 12px;
   background: var(--card-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  cursor: grab;
+  transition: box-shadow 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.skill-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent);
+}
+
+.skill-item:active {
+  cursor: grabbing;
+}
+
+.skill-item.is-dragging {
+  opacity: 0.5;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transform: scale(0.98);
 }
 
 .skill-item-top {
