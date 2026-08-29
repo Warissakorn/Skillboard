@@ -35,28 +35,55 @@ function findChatInput() {
 }
 
 function insertIntoTextarea(el, text) {
+  // แทรกที่ตำแหน่งเคอร์เซอร์แทนการล้างข้อความเดิมทิ้ง — เชื่อ selectionStart/End
+  // ก็ต่อเมื่อช่องนี้เป็นช่องที่ผู้ใช้โฟกัสอยู่จริงก่อนกด Use เท่านั้น (เช็คก่อน
+  // เรียก focus() ใดๆ เพราะการ focus เองอาจไปรีเซ็ตตำแหน่งเคอร์เซอร์) ถ้าไม่ได้
+  // โฟกัสอยู่ (เช่น เพิ่งเลือกช่องนี้มาแบบ fallback) ให้ต่อท้ายข้อความเดิมเสมอ
+  const wasFocused = document.activeElement === el;
+  const start = wasFocused && typeof el.selectionStart === "number" ? el.selectionStart : el.value.length;
+  const end = wasFocused && typeof el.selectionEnd === "number" ? el.selectionEnd : el.value.length;
+
   const nativeSetter = Object.getOwnPropertyDescriptor(
     window.HTMLTextAreaElement.prototype,
     "value"
   ).set;
-  nativeSetter.call(el, text);
+  const newValue = el.value.slice(0, start) + text + el.value.slice(end);
+  nativeSetter.call(el, newValue);
+
+  const cursorPos = start + text.length;
+  el.selectionStart = el.selectionEnd = cursorPos;
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function insertIntoContentEditable(el, text) {
+  // เก็บตำแหน่งเคอร์เซอร์เดิมไว้ก่อนเรียก focus() เพราะ focus() เองอาจไปรีเซ็ต
+  // ตำแหน่ง caret ในบางเบราว์เซอร์/บาง editor framework
+  const wasFocused = document.activeElement === el;
+  const selection = window.getSelection();
+  const savedRange =
+    wasFocused && selection.rangeCount > 0 && el.contains(selection.getRangeAt(0).commonAncestorContainer)
+      ? selection.getRangeAt(0).cloneRange()
+      : null;
+
   el.focus();
 
-  // เลือกเนื้อหาเดิมทั้งหมดก่อนแทรก เพื่อให้ execCommand แทนที่แทนการต่อท้าย
-  const selection = window.getSelection();
-  const range = document.createRange();
-  range.selectNodeContents(el);
-  selection.removeAllRanges();
-  selection.addRange(range);
+  if (savedRange) {
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+  } else {
+    // ไม่ได้โฟกัสช่องนี้อยู่ก่อน (เช่น เพิ่งเลือกช่องนี้มาแบบ fallback) —
+    // ต่อท้ายข้อความเดิมเสมอ ไม่ใช่ล้างทิ้งแล้วแทนที่
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false); // collapse ไปที่ท้ายเนื้อหาเดิม
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
 
   const inserted = document.execCommand("insertText", false, text);
   if (!inserted) {
-    // fallback กรณี execCommand ใช้ไม่ได้ (บาง browser/บาง build)
-    el.textContent = text;
+    // fallback กรณี execCommand ใช้ไม่ได้ (บาง browser/บาง build) — ต่อท้ายเนื้อหาเดิม
+    el.appendChild(document.createTextNode(text));
   }
   el.dispatchEvent(new Event("input", { bubbles: true }));
 }
