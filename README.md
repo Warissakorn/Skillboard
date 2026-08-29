@@ -3,7 +3,7 @@
 > your mixtape of prompts
 
 Chrome Extension (Manifest V3) สำหรับจัดเก็บ Skill/Prompt ของคุณ และแทรกลงช่องแชท
-ของ ChatGPT หรือ Claude ได้ในคลิกเดียว — ไม่มี dependency, ไม่มี build step,
+ของเว็บ AI **ไหนก็ได้** ในคลิกเดียว — ไม่มี dependency, ไม่มี build step,
 เขียนด้วย vanilla JavaScript (ES2022) ล้วน
 
 **สถานะ:** พัฒนาเสร็จสมบูรณ์ พร้อมใช้งานจริงและพร้อมแพ็กสำหรับอัปโหลด
@@ -24,7 +24,9 @@ Chrome Web Store
 3. คลิก **Load unpacked** แล้วเลือกโฟลเดอร์นี้ (โฟลเดอร์ที่มี `manifest.json`)
 4. ไอคอน Skilltape จะปรากฏบน toolbar
 
-**เว็บไซต์ที่รองรับการแทรกข้อความ:** chat.openai.com, chatgpt.com, claude.ai
+**เว็บไซต์ที่รองรับการแทรกข้อความ:** ทุกเว็บไซต์ (content script รันบนทุก
+http/https page แล้วหาช่องพิมพ์ข้อความแบบทั่วไป ไม่ผูกกับเว็บใดเว็บหนึ่ง —
+ใช้ได้กับ ChatGPT, Claude, Gemini, Perplexity, Copilot ฯลฯ)
 
 ---
 
@@ -111,26 +113,33 @@ wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็
 
 ## Content Script (`content/content.js`)
 
-ถูกฉีดเข้าเฉพาะหน้า chat.openai.com, chatgpt.com, และ claude.ai (ตาม
-`content_scripts.matches` ใน `manifest.json`) รอรับ message
-`{ type: "INSERT_SKILL", text }` จาก popup แล้ว:
+ถูกฉีดเข้า **ทุกหน้าเว็บ** (`content_scripts.matches: ["http://*/*", "https://*/*"]`
+ใน `manifest.json`) รอรับ message `{ type: "INSERT_SKILL", text }` จาก popup
+แล้วเดาช่องพิมพ์ข้อความแบบทั่วไป ไม่ผูกกับโครงสร้าง DOM ของเว็บใดเว็บหนึ่ง:
 
-1. หาช่องแชทด้วย selector เรียงลำดับ: `textarea` → `[contenteditable="true"]`
-   → `div[role="textbox"]` (เลือกตัวแรกที่มองเห็นได้และไม่ disabled)
+1. **หาช่องพิมพ์** — selector ครอบคลุม `textarea`, `[contenteditable="true"]`,
+   `div[role="textbox"]` โดยเลือกตามลำดับความสำคัญ:
+   - ช่องที่ผู้ใช้กำลังโฟกัสอยู่ (`document.activeElement`) ก่อนเสมอ ถ้าใช้ได้
+   - ถ้าไม่มีช่องที่โฟกัสอยู่ ให้เลือกช่องที่ **มองเห็นได้และไม่ disabled** ที่มี
+     พื้นที่ (กว้าง×สูง) ใหญ่ที่สุดบนหน้า เพราะช่องแชทหลักมักใหญ่กว่าช่องค้นหา/
+     คอมเมนต์เล็กๆ อื่นบนหน้าเดียวกัน
 2. ถ้าเป็น `<textarea>` — set ค่าผ่าน native setter แล้ว dispatch `input` event
    (จำเป็นสำหรับ React-controlled input อย่าง ChatGPT)
 3. ถ้าเป็น contenteditable — เลือกเนื้อหาเดิมทั้งหมดแล้วใช้
    `document.execCommand("insertText")` แทนที่ (มี fallback เป็น `textContent`)
-4. ถ้าหาช่องแชทไม่เจอ → ตอบกลับ `{ success: false }` และ popup จะแสดง toast
-   เตือนให้เปิดหน้า AI ก่อน
+4. ถ้าหาช่องพิมพ์ไม่เจอเลยในหน้านั้น → ตอบกลับ `{ success: false }` และ popup
+   จะแสดง toast เตือนให้เปิดหน้าแชท AI ก่อน
 
-**ทดสอบ:** Load unpacked → เปิดแท็บ ChatGPT หรือ Claude.ai → เปิด popup →
-กด 🚀 บน skill ใดก็ได้ → ข้อความควรปรากฏในช่องแชททันทีพร้อม toast
-"แทรกแล้ว! กด Enter เพื่อส่ง" ลองกด 🚀 บนแท็บเว็บอื่นดูด้วย ควรเห็น toast
-เตือนโดยไม่ crash
+**ทดสอบ:** Load unpacked → เปิดแท็บเว็บ AI ที่ต้องการ (ChatGPT, Claude, Gemini,
+Perplexity ฯลฯ) → เปิด popup → กด 🚀 บน skill ใดก็ได้ → ข้อความควรปรากฏในช่อง
+แชททันทีพร้อม toast "แทรกแล้ว! กด Enter เพื่อส่ง" ลองกด 🚀 บนหน้าที่ไม่มีช่อง
+พิมพ์เลย (เช่นหน้าบทความ) ควรเห็น toast เตือนโดยไม่ crash
 
-> **หมายเหตุ:** DOM ของ ChatGPT/Claude.ai เปลี่ยนได้บ่อย หากปุ่ม Use ใช้ไม่ได้
-> อีกต่อไป ให้ตรวจสอบและปรับ selector ใน `findChatInput()` ก่อน
+> **หมายเหตุ:** เพราะรันบนทุกเว็บและเดาช่องพิมพ์แบบทั่วไป จึงอาจแทรกผิดช่องได้
+> บนบางหน้าที่มีหลายช่องพิมพ์ขนาดใกล้เคียงกัน (เช่นแบบฟอร์มยาวๆ) — ถ้าเจอปัญหา
+> ให้คลิกที่ช่องแชทที่ต้องการก่อนกด 🚀 (ระบบจะให้ความสำคัญกับช่องที่โฟกัสอยู่
+> ก่อนเสมอ) และถ้าเว็บ AI เปลี่ยน DOM จนหาช่องไม่เจอเลย ให้ปรับ logic ใน
+> `findChatInput()`
 
 ---
 
@@ -153,8 +162,8 @@ wrapper สำหรับ `chrome.storage.local` เปิดใช้เป็
 
 | ปัญหา | สาเหตุที่เป็นไปได้ / วิธีแก้ |
 |---|---|
-| กด 🚀 Use แล้วไม่มีอะไรเกิดขึ้น | ตรวจว่าแท็บที่ active อยู่เป็น chat.openai.com, chatgpt.com หรือ claude.ai และรีเฟรชหน้านั้นหลัง Load unpacked ใหม่ (content script จะฉีดหลัง reload เท่านั้น) |
-| แทรกข้อความไม่เข้าช่องแชท | DOM ของเว็บ AI อาจเปลี่ยน — ตรวจสอบ selector ใน `content/content.js` (`findChatInput`) |
+| กด 🚀 Use แล้วไม่มีอะไรเกิดขึ้น | รีเฟรชหน้าเว็บนั้นหลัง Load unpacked ใหม่ (content script จะฉีดหลัง reload เท่านั้น) — ใช้ได้กับทุกเว็บแล้ว ไม่จำกัดเฉพาะ ChatGPT/Claude อีกต่อไป |
+| แทรกข้อความผิดช่อง หรือหาช่องแชทไม่เจอ | คลิกที่ช่องแชทที่ต้องการก่อนกด 🚀 (ระบบให้ความสำคัญกับช่องที่โฟกัสอยู่ก่อนเสมอ) ถ้ายังไม่ได้ให้ตรวจสอบ/ปรับ logic ใน `content/content.js` (`findChatInput`) |
 | ข้อมูลหายหลัง Import | ตรวจว่าเลือกโหมดถูกต้องตอนกด confirm (ตกลง = แทนที่ทั้งหมด, ยกเลิก = รวมกับข้อมูลเดิม) |
 | Popup ไม่แสดงข้อมูลที่บันทึกไว้ | เปิด DevTools ของ popup แล้วเช็ค error ใน console, ตรวจสอบว่า permission `storage` ยังอยู่ใน manifest.json |
 | ไอคอนไม่ขึ้นหรือขึ้นเป็นสีเทา | ลอง Remove แล้ว Load unpacked ใหม่, ตรวจว่าไฟล์ icons/*.png ยังอยู่ครบ |
