@@ -112,6 +112,17 @@ function createSkillItem(skill) {
     li.classList.add("skill-item-editing");
   }
 
+  // ลากการ์ดนี้ไปวางในช่องพิมพ์ของหน้าเว็บได้ (native HTML5 drag-and-drop)
+  li.draggable = true;
+  li.addEventListener("dragstart", (event) => {
+    event.dataTransfer.setData("text/plain", skill.content);
+    event.dataTransfer.effectAllowed = "copy";
+    li.classList.add("is-dragging");
+  });
+  li.addEventListener("dragend", () => {
+    li.classList.remove("is-dragging");
+  });
+
   const top = document.createElement("div");
   top.className = "skill-item-top";
 
@@ -127,6 +138,7 @@ function createSkillItem(skill) {
 
   const actions = document.createElement("div");
   actions.className = "skill-actions";
+  actions.draggable = false; // กันไม่ให้การคลิกปุ่มในการ์ดไปเริ่ม drag โดยไม่ตั้งใจ
 
   const useBtn = document.createElement("button");
   useBtn.className = "icon-btn";
