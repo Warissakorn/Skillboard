@@ -1,23 +1,23 @@
-✔ search covers name, case-insensitive content and tags, excluding legacy categories (2.780599ms)
-✔ empty and no-results states differ (0.849673ms)
-✔ blank submission is rejected and valid create saves trimmed values (1.110327ms)
-✔ edit updates existing id and preserves legacy metadata (1.5763ms)
-✔ import cancel performs zero writes; merge is explicit; replace requires confirmation (1.227434ms)
-✔ pending save blocks duplicate submit and failure allows retry without losing input (1.796704ms)
-✔ full reader preserves multiline prompt as text and closes explicitly (0.838867ms)
-✔ new editor opens on demand; Escape closes unless save is pending (0.82793ms)
-✔ import failures stay visible in dialog and permit retry (1.068042ms)
-✔ external storage changes update library while preserving open editor input (0.969284ms)
-✔ mini window targets active tab in source window, never itself (2.256117ms)
-✔ toolbar popup targets its current window (0.734359ms)
-✔ missing source fails safely instead of inserting into another window (1.038328ms)
-✔ open creates small resizable popup before closing toolbar popup (1.103145ms)
-✔ failed open retains toolbar popup and allows retry (0.846869ms)
-✔ repeated click during window creation creates only one window (1.321546ms)
-✔ card mode toggles in toolbar without opening or resizing a browser window (0.689421ms)
-✔ detached cards shrink window and restore custom original dimensions (0.770494ms)
-✔ failed resize leaves current mode unchanged and enables retry (0.871346ms)
-✔ opening detached window preserves cards layout (1.030856ms)
+✔ search covers name, case-insensitive content and tags, excluding legacy categories (2.923425ms)
+✔ empty and no-results states differ (0.862513ms)
+✔ blank submission is rejected and valid create saves trimmed values (1.075214ms)
+✔ edit updates existing id and preserves legacy metadata (1.454456ms)
+✔ import cancel performs zero writes; merge is explicit; replace requires confirmation (1.224499ms)
+✔ pending save blocks duplicate submit and failure allows retry without losing input (1.68175ms)
+✔ full reader preserves multiline prompt as text and closes explicitly (0.855171ms)
+✔ new editor opens on demand; Escape closes unless save is pending (0.760118ms)
+✔ import failures stay visible in dialog and permit retry (1.008463ms)
+✔ external storage changes update library while preserving open editor input (0.93972ms)
+✔ mini window targets active tab in source window, never itself (2.266163ms)
+✔ toolbar popup targets its current window (0.686998ms)
+✔ missing source fails safely instead of inserting into another window (0.919389ms)
+✔ open creates small resizable popup before closing toolbar popup (0.929714ms)
+✔ failed open retains toolbar popup and allows retry (0.749722ms)
+✔ repeated click during window creation creates only one window (0.894781ms)
+✔ card mode toggles in toolbar without opening or resizing a browser window (0.74771ms)
+✔ detached cards shrink window and restore custom original dimensions (0.889573ms)
+✔ failed resize leaves current mode unchanged and enables retry (0.823173ms)
+✔ opening detached window preserves cards layout (1.066421ms)
 ℹ tests 20
 ℹ suites 0
 ℹ pass 20
@@ -25,4 +25,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 97.718711
+ℹ duration_ms 91.405723
