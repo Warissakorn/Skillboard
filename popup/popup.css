@@ -441,3 +441,21 @@ body.mini-window { width:100%; height:100dvh; min-width:280px; }
 .mini-window .app-footer { padding:6px 10px; }
 .mini-window .toast { left:10px; right:10px; bottom:52px; }
 @media(max-height:400px) { .field textarea { min-height:80px; } dialog { padding:14px; } }
+
+/* Short window with portrait cards in one horizontal row. */
+.mode-btn { flex:0 0 auto; width:28px; padding:2px!important; font-size:18px!important; }
+.mode-btn[aria-pressed="true"] { background:var(--soft); color:var(--accent); border-color:var(--accent); }
+body.card-mode:not(.mini-window) { height:380px; }
+.card-mode .list-section { overflow-x:scroll; overflow-y:auto; padding-bottom:8px; scroll-snap-type:x proximity; scrollbar-gutter:stable; }
+.card-mode #skillList { flex-direction:row; align-items:stretch; width:max-content; min-width:100%; gap:8px; }
+.card-mode .skill-item { flex:0 0 164px; width:164px; min-height:200px; padding:10px; display:flex; flex-direction:column; scroll-snap-align:start; }
+.card-mode .skill-name { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; line-height:1.4; }
+.card-mode .skill-content-preview { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; margin:6px 0; }
+.card-mode .read-btn { align-self:flex-start; margin-top:auto; }
+.card-mode .skill-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+.card-mode .use-btn { grid-column:1 / -1; width:100%; margin-right:0; }
+.card-mode .icon-btn { padding:2px; white-space:nowrap; }
+.card-mode .list-section::-webkit-scrollbar { height:8px; }
+.card-mode .list-section::-webkit-scrollbar-track { background:var(--soft); border-radius:6px; }
+.card-mode .list-section::-webkit-scrollbar-thumb { background:var(--muted); border-radius:6px; }
+.list-section:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }

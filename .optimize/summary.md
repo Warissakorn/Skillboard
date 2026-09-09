@@ -72,3 +72,18 @@ visual verification remains outstanding due to the previously documented block.
 - Run node --test tests/*.test.cjs (16 passed) plus existing storage assertions
   (11 passed). Browser/OS window behavior and visual layout still need manual
   verification in Chrome; previous preview policy block remains unresolved.
+
+## Follow-up: horizontal portrait-card mode
+
+Added header toggle with aria-pressed; no reload, so search and in-progress UI
+state remain intact. Standard popup height is 580 → 380 CSS px. Detached windows
+request 420px outer height to allow space for OS chrome, then restore their
+previous dimensions on exit. Cards are 164px wide / at least 200px tall in one
+horizontal row with a visible scrollbar (subject to OS scrollbar settings).
+All card actions remain available; list is keyboard focusable. Opening a mini
+window preserves the selected cards layout and original browser target.
+
+Validation: 20 UI/window tests and 11 existing storage assertions pass (mocks).
+Includes toggle round-trip, custom dimensions restoration, failed resize and
+layout handover to a detached window. Actual browser layout remains unverified
+because the previously documented preview security block still applies.

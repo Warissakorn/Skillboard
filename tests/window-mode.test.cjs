@@ -3,16 +3,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 function setup(search='') {
-  const calls = [], messages = [], button = {addEventListener(){}};
+  const calls = [], messages = [], button = {addEventListener(){},setAttribute(){}};
+  const cardButton = {addEventListener(){},setAttribute(key,value){this[key]=value}};
   const window = {location:{search},close(){calls.push('close')}};
   const chrome = {
     runtime:{getURL:path=>'chrome-extension://test/'+path},
-    windows:{getCurrent:async()=>({id:7}),create:async options=>{calls.push(options)}},
+    windows:{getCurrent:async()=>({id:7,width:360,height:480}),update:async(id,size)=>{calls.push({id,...size})},create:async options=>{calls.push(options)}},
     tabs:{query:async query=>{calls.push(query);return [{id:25}]}},
   };
-  const context = vm.createContext({window,chrome,URL,URLSearchParams,document:{body:{classList:{add(){}}},getElementById:()=>button},showToast:message=>messages.push(message)});
+  const context = vm.createContext({window,chrome,URL,URLSearchParams,document:{body:{classList:{add(){},toggle(){}}},getElementById:id=>id === "cardModeBtn" ? cardButton : button},showToast:message=>messages.push(message)});
   vm.runInContext(fs.readFileSync('popup/window-mode.js','utf8'),context);
-  return {api:window.SkilltapeWindow,chrome,calls,messages,button};
+  return {api:window.SkilltapeWindow,chrome,calls,messages,button,cardButton};
 }
 test('mini window targets active tab in source window, never itself',async()=>{
   const h=setup('?mode=mini&sourceWindow=7');
@@ -39,4 +40,22 @@ test('failed open retains toolbar popup and allows retry',async()=>{
 test('repeated click during window creation creates only one window',async()=>{
   const h=setup();let release,count=0;h.chrome.windows.create=async()=>{count++;await new Promise(r=>release=r)};
   const pending=h.api.openMiniWindow();await Promise.resolve();await h.api.openMiniWindow();assert.equal(count,1);release();await pending;
+});
+test('card mode toggles in toolbar without opening or resizing a browser window',async()=>{
+  const h=setup();await h.api.toggleCardMode();assert.equal(h.cardButton['aria-pressed'],'true');assert.equal(h.calls.length,0);
+  await h.api.toggleCardMode();assert.equal(h.cardButton['aria-pressed'],'false');
+});
+test('detached cards shrink window and restore custom original dimensions',async()=>{
+  const h=setup('?mode=mini&sourceWindow=7');h.chrome.windows.getCurrent=async()=>({id:9,width:500,height:650});
+  await h.api.toggleCardMode();assert.equal(h.calls[0].height,420);assert.equal(h.cardButton['aria-pressed'],'true');
+  await h.api.toggleCardMode();assert.equal(h.calls[1].width,500);assert.equal(h.calls[1].height,650);
+  await h.api.getTargetTab();assert.equal(h.calls[2].windowId,7);
+});
+test('failed resize leaves current mode unchanged and enables retry',async()=>{
+  const h=setup('?mode=mini&sourceWindow=7');h.chrome.windows.update=async()=>{throw new Error('failed')};
+  await h.api.toggleCardMode();assert.equal(h.cardButton['aria-pressed'],'false');assert.equal(h.cardButton.disabled,false);assert.equal(h.messages.length,1);
+});
+test('opening detached window preserves cards layout',async()=>{
+  const h=setup();await h.api.toggleCardMode();await h.api.openMiniWindow();
+  assert.equal(new URL(h.calls[0].url).searchParams.get('layout'),'cards');assert.equal(h.calls[0].height,420);
 });
