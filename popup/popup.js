@@ -74,6 +74,8 @@ function enterEditMode(skill) {
   els.category.value = skill.category;
   clearFormError();
 
+  document.getElementById("editorTitle").textContent = "แก้ไข Skill";
+  document.getElementById("editorDialog").showModal();
   els.formSection.classList.add("editing");
   els.saveBtn.textContent = "🔄 อัปเดต skill";
   els.cancelEditBtn.hidden = false;
@@ -84,7 +86,7 @@ function exitEditMode() {
   state.editingId = null;
   els.formSection.classList.remove("editing");
   els.saveBtn.textContent = "💾 บันทึก skill";
-  els.cancelEditBtn.hidden = true;
+  document.getElementById("editorDialog").close();
   resetForm();
 }
 
@@ -206,7 +208,7 @@ function render() {
   if (hasActiveFilter) {
     els.resultCount.textContent = `พบ ${sorted.length} skills`;
   } else {
-    els.resultCount.textContent = "";
+    els.resultCount.textContent = `${state.skills.length} Skills พร้อมใช้งาน`;
   }
 
   if (!hasResults) return;
@@ -306,7 +308,7 @@ async function handleSubmit(event) {
       showToast("อัปเดตแล้ว");
     } else {
       await window.SkilltapeStorage.saveSkill({ name, content, category });
-      resetForm();
+      exitEditMode();
       await refresh();
       showToast("บันทึกแล้ว");
     }
@@ -334,6 +336,7 @@ function handleCategoryChipClick(event) {
   state.categoryFilter = chip.dataset.category;
   for (const el of els.categoryChips.querySelectorAll(".chip")) {
     el.classList.toggle("is-active", el === chip);
+    el.setAttribute("aria-pressed", String(el === chip));
   }
   render();
 }
@@ -421,6 +424,17 @@ document.getElementById("cancelImportBtn").addEventListener("click", cancelImpor
 document.getElementById("importDialog").addEventListener("cancel", event => {
   event.preventDefault();
   cancelImport();
+});
+
+document.getElementById("addSkillBtn").addEventListener("click", () => {
+  exitEditMode();
+  document.getElementById("editorTitle").textContent = "เพิ่ม Skill";
+  document.getElementById("editorDialog").showModal();
+  els.name.focus();
+});
+document.getElementById("editorDialog").addEventListener("cancel", event => {
+  event.preventDefault();
+  if (!state.saving) exitEditMode();
 });
 
 els.form.addEventListener("submit", handleSubmit);

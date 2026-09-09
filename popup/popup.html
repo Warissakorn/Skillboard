@@ -7,12 +7,45 @@
 </head>
 <body>
   <header class="app-header">
-    <h1>🎧 Skilltape</h1>
-    <p class="tagline">your mixtape of prompts</p>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">S</span><div><h1>Skilltape</h1><p class="tagline">Your prompts, ready to play.</p></div></div>
+    <button id="addSkillBtn" class="primary-btn" type="button">＋ เพิ่ม Skill</button>
   </header>
 
   <main id="app">
-    <section class="form-section">
+    <section class="search-section">
+      <label class="section-label" for="searchInput">คลัง Prompt ของคุณ</label>
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="ค้นหาชื่อ เนื้อหา หรือหมวดหมู่…"
+      />
+      <div id="categoryChips" class="category-chips">
+        <button type="button" aria-pressed="true" class="chip is-active" data-category="all">ทั้งหมด</button>
+        <button type="button" aria-pressed="false" class="chip" data-category="general">ทั่วไป</button>
+        <button type="button" aria-pressed="false" class="chip" data-category="coding">โค้ดดิ้ง</button>
+        <button type="button" aria-pressed="false" class="chip" data-category="writing">งานเขียน</button>
+        <button type="button" aria-pressed="false" class="chip" data-category="business">ธุรกิจ</button>
+      </div>
+      <p aria-live="polite" id="resultCount" class="result-count"></p>
+    </section>
+
+    <section class="list-section">
+      <ul id="skillList"></ul>
+      <p id="emptyState" class="empty-state" hidden>ยังไม่มี Skill — กด “＋ เพิ่ม Skill” เพื่อเก็บ Prompt แรกของคุณ</p>
+      <p id="noResultsState" class="empty-state" hidden>ไม่พบ Skill ลองเปลี่ยนคำค้นหรือเลือกหมวดหมู่ “ทั้งหมด”</p>
+    </section>
+
+    <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="exportBtn" class="footer-btn">ส่งออก JSON</button>
+    <button id="importBtn" class="footer-btn">นำเข้า JSON</button>
+    <input id="importFileInput" type="file" accept=".json,application/json" hidden />
+  </footer>
+
+    <dialog id="editorDialog" class="form-section" aria-labelledby="editorTitle">
+      <h2 id="editorTitle">เพิ่ม Skill</h2>
       <form id="skillForm" novalidate>
         <div class="field">
           <label for="skillName">ชื่อ</label>
@@ -31,44 +64,14 @@
             <option value="business">ธุรกิจ</option>
           </select>
         </div>
-        <p id="formError" class="form-error" hidden></p>
+        <p id="formError" role="alert" class="form-error" hidden></p>
         <div class="form-actions">
           <button type="submit" id="saveBtn">💾 บันทึก skill</button>
-          <button type="button" id="cancelEditBtn" class="footer-btn" hidden>ยกเลิกการแก้ไข</button>
+          <button type="button" id="cancelEditBtn" class="footer-btn">ยกเลิก</button>
         </div>
       </form>
-    </section>
+    </dialog>
 
-    <section class="search-section">
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="🔍 ค้นหา skill..."
-      />
-      <div id="categoryChips" class="category-chips">
-        <button type="button" class="chip is-active" data-category="all">ทั้งหมด</button>
-        <button type="button" class="chip" data-category="general">ทั่วไป</button>
-        <button type="button" class="chip" data-category="coding">โค้ดดิ้ง</button>
-        <button type="button" class="chip" data-category="writing">งานเขียน</button>
-        <button type="button" class="chip" data-category="business">ธุรกิจ</button>
-      </div>
-      <p id="resultCount" class="result-count"></p>
-    </section>
-
-    <section class="list-section">
-      <ul id="skillList"></ul>
-      <p id="emptyState" class="empty-state" hidden>ยังไม่มี skill ในเทปของคุณ 🎵</p>
-      <p id="noResultsState" class="empty-state" hidden>ไม่เจอ skill ที่ค้นหา 🔍</p>
-    </section>
-
-    <div id="toast" class="toast" hidden></div>
-  </main>
-
-  <footer class="app-footer">
-    <button id="exportBtn" class="footer-btn">⬇️ Export</button>
-    <button id="importBtn" class="footer-btn">⬆️ Import</button>
-    <input id="importFileInput" type="file" accept=".json,application/json" hidden />
-  </footer>
 
   <dialog id="importDialog" aria-labelledby="importTitle">
     <h2 id="importTitle">นำเข้า Skills</h2>
