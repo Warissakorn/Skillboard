@@ -87,3 +87,13 @@ Validation: 20 UI/window tests and 11 existing storage assertions pass (mocks).
 Includes toggle round-trip, custom dimensions restoration, failed resize and
 layout handover to a detached window. Actual browser layout remains unverified
 because the previously documented preview security block still applies.
+
+## Follow-up: toolbar logo
+
+Replaced the generic letter tile with a cassette/prompt-play mark designed on a
+1024px transparent master and downsampled with Lanczos to 128, 48 and 16px. The
+blue/white silhouette is intentionally simple for toolbar size and matches the
+current UI palette. Verified PNG dimensions, RGBA mode and non-empty bounds;
+inspected the three sizes on white, dark navy and light gray backgrounds. The
+same 48px asset now appears at 30px in the popup header. Manifest paths are
+unchanged, so no permission or extension behavior changes.
