@@ -145,31 +145,32 @@ function createSkillItem(skill) {
   actions.draggable = false; // กันไม่ให้การคลิกปุ่มในการ์ดไปเริ่ม drag โดยไม่ตั้งใจ
 
   const useBtn = document.createElement("button");
-  useBtn.className = "icon-btn";
+  useBtn.className = "icon-btn use-btn";
   useBtn.type = "button";
   useBtn.title = "ใช้ใน AI";
-  useBtn.textContent = "🚀";
+  useBtn.textContent = "ใช้ Prompt ↗";
   useBtn.addEventListener("click", () => handleUse(skill));
 
   const editBtn = document.createElement("button");
   editBtn.className = "icon-btn";
   editBtn.type = "button";
   editBtn.title = "แก้ไข";
-  editBtn.textContent = "✏️";
+  editBtn.textContent = "แก้ไข";
   editBtn.addEventListener("click", () => enterEditMode(skill));
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "icon-btn";
   copyBtn.type = "button";
   copyBtn.title = "คัดลอก";
-  copyBtn.textContent = "📋";
+  copyBtn.textContent = "คัดลอก";
   copyBtn.addEventListener("click", () => handleCopy(skill));
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "icon-btn";
   deleteBtn.type = "button";
   deleteBtn.title = "ลบ";
-  deleteBtn.textContent = "🗑️";
+  deleteBtn.textContent = "ลบ";
+  deleteBtn.classList.add("delete-btn");
   deleteBtn.addEventListener("click", () => handleDelete(skill));
 
   actions.appendChild(useBtn);
@@ -178,7 +179,7 @@ function createSkillItem(skill) {
   actions.appendChild(deleteBtn);
 
   top.appendChild(info);
-  top.appendChild(actions);
+
 
   const preview = document.createElement("div");
   preview.className = "skill-content-preview";
@@ -186,6 +187,18 @@ function createSkillItem(skill) {
 
   li.appendChild(top);
   li.appendChild(preview);
+  const readBtn = document.createElement("button");
+  readBtn.type = "button";
+  readBtn.className = "read-btn";
+  readBtn.textContent = "อ่านเนื้อหาเต็ม";
+  readBtn.setAttribute("aria-label", `อ่านเนื้อหาเต็ม: ${skill.name}`);
+  readBtn.addEventListener("click", () => {
+    document.getElementById("previewTitle").textContent = skill.name;
+    document.getElementById("previewContent").textContent = skill.content;
+    document.getElementById("previewDialog").showModal();
+  });
+  li.appendChild(readBtn);
+  li.appendChild(actions);
 
   return li;
 }
@@ -425,6 +438,8 @@ document.getElementById("importDialog").addEventListener("cancel", event => {
   event.preventDefault();
   cancelImport();
 });
+
+document.getElementById("closePreviewBtn").addEventListener("click", () => document.getElementById("previewDialog").close());
 
 document.getElementById("addSkillBtn").addEventListener("click", () => {
   exitEditMode();
