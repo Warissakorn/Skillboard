@@ -7,12 +7,42 @@
 </head>
 <body>
   <header class="app-header">
-    <h1>🎧 Skilltape</h1>
-    <p class="tagline">your mixtape of prompts</p>
+    <div class="brand"><img class="brand-logo" src="../icons/icon48.png" width="30" height="30" alt="" /><div><h1>Skilltape</h1></div></div>
+    <div class="header-actions">
+    <button id="cardModeBtn" class="footer-btn mode-btn" type="button" aria-label="โหมดการ์ดเล็ก" aria-pressed="false" title="สลับการ์ดเล็กแนวตั้ง เลื่อนแนวนอน">▥</button>
+    <button id="miniWindowBtn" class="footer-btn" type="button" title="เปิดค้างและปรับขนาดได้ ใช้ Prompt กับแท็บที่เลือกในหน้าต่างเดิม">หน้าต่าง ↗</button>
+    <button id="addSkillBtn" class="primary-btn" type="button">＋ เพิ่ม Skill</button>
+    </div>
   </header>
 
   <main id="app">
-    <section class="form-section">
+    <section class="search-section">
+      <label class="visually-hidden" for="searchInput">คลัง Prompt ของคุณ</label>
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="ค้นหาชื่อหรือเนื้อหา Prompt…"
+      />
+      <p aria-live="polite" id="resultCount" class="result-count"></p>
+    </section>
+
+    <section class="list-section" tabindex="0" aria-label="รายการ Prompt">
+      <ul id="skillList"></ul>
+      <p id="emptyState" class="empty-state" hidden>ยังไม่มี Skill — กด “＋ เพิ่ม Skill” เพื่อเก็บ Prompt แรกของคุณ</p>
+      <p id="noResultsState" class="empty-state" hidden>ไม่พบ Skill ลองเปลี่ยนคำค้นหรือล้างช่องค้นหา</p>
+    </section>
+
+    <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="exportBtn" class="footer-btn">ส่งออก JSON</button>
+    <button id="importBtn" class="footer-btn">นำเข้า JSON</button>
+    <input id="importFileInput" type="file" accept=".json,application/json" hidden />
+  </footer>
+
+    <dialog id="editorDialog" class="form-section" aria-labelledby="editorTitle">
+      <h2 id="editorTitle">เพิ่ม Skill</h2>
       <form id="skillForm" novalidate>
         <div class="field">
           <label for="skillName">ชื่อ</label>
@@ -22,55 +52,32 @@
           <label for="skillContent">เนื้อหา</label>
           <textarea id="skillContent" rows="4" placeholder="วางเนื้อหา skill/prompt ที่นี่..."></textarea>
         </div>
-        <div class="field">
-          <label for="skillCategory">หมวดหมู่</label>
-          <select id="skillCategory">
-            <option value="general">ทั่วไป</option>
-            <option value="coding">โค้ดดิ้ง</option>
-            <option value="writing">งานเขียน</option>
-            <option value="business">ธุรกิจ</option>
-          </select>
-        </div>
-        <p id="formError" class="form-error" hidden></p>
+        <p id="formError" role="alert" class="form-error" hidden></p>
         <div class="form-actions">
-          <button type="submit" id="saveBtn">💾 บันทึก skill</button>
-          <button type="button" id="cancelEditBtn" class="footer-btn" hidden>ยกเลิกการแก้ไข</button>
+          <button type="submit" id="saveBtn">บันทึก Skill</button>
+          <button type="button" id="cancelEditBtn" class="footer-btn">ยกเลิก</button>
         </div>
       </form>
-    </section>
+    </dialog>
 
-    <section class="search-section">
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="🔍 ค้นหา skill..."
-      />
-      <div id="categoryChips" class="category-chips">
-        <button type="button" class="chip is-active" data-category="all">ทั้งหมด</button>
-        <button type="button" class="chip" data-category="general">ทั่วไป</button>
-        <button type="button" class="chip" data-category="coding">โค้ดดิ้ง</button>
-        <button type="button" class="chip" data-category="writing">งานเขียน</button>
-        <button type="button" class="chip" data-category="business">ธุรกิจ</button>
-      </div>
-      <p id="resultCount" class="result-count"></p>
-    </section>
 
-    <section class="list-section">
-      <ul id="skillList"></ul>
-      <p id="emptyState" class="empty-state" hidden>ยังไม่มี skill ในเทปของคุณ 🎵</p>
-      <p id="noResultsState" class="empty-state" hidden>ไม่เจอ skill ที่ค้นหา 🔍</p>
-    </section>
-
-    <div id="toast" class="toast" hidden></div>
-  </main>
-
-  <footer class="app-footer">
-    <button id="exportBtn" class="footer-btn">⬇️ Export</button>
-    <button id="importBtn" class="footer-btn">⬆️ Import</button>
-    <input id="importFileInput" type="file" accept=".json,application/json" hidden />
-  </footer>
-
+  <dialog id="previewDialog" aria-labelledby="previewTitle">
+    <h2 id="previewTitle"></h2>
+    <div id="previewContent" class="full-preview"></div>
+    <button id="closePreviewBtn" class="footer-btn" type="button">ปิด</button>
+  </dialog>
+  <dialog id="importDialog" aria-labelledby="importTitle">
+    <h2 id="importTitle">นำเข้า Skills</h2>
+    <p>เลือกวิธีนำเข้าไฟล์ของคุณ การแทนที่จะลบรายการเดิมทั้งหมด</p>
+    <p id="importError" class="form-error" role="alert" hidden></p>
+    <div class="dialog-actions">
+      <button id="mergeImportBtn" type="button">รวมกับข้อมูลเดิม</button>
+      <button id="replaceImportBtn" type="button">แทนที่ทั้งหมด</button>
+      <button id="cancelImportBtn" type="button">ยกเลิก</button>
+    </div>
+  </dialog>
   <script src="../utils/storage.js"></script>
+  <script src="window-mode.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+✔ search covers Thai category, case-insensitive content and tags; category filters combine (4.266812ms)
+✔ empty and no-results states differ (1.652756ms)
+✔ blank submission is rejected and valid create saves trimmed values (2.044067ms)
+✔ edit updates existing id and keeps tags (2.76844ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.261636

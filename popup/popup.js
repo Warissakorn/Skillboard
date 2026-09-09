@@ -1,12 +1,5 @@
 // popup.js — เพิ่ม/แสดง/ค้นหา/แก้ไข/ลบ/คัดลอก/ใช้ skill และ export/import
 
-const CATEGORY_LABELS = {
-  general: "ทั่วไป",
-  coding: "โค้ดดิ้ง",
-  writing: "งานเขียน",
-  business: "ธุรกิจ",
-};
-
 const SEARCH_DEBOUNCE_MS = 150;
 
 const els = {
@@ -14,7 +7,6 @@ const els = {
   form: document.getElementById("skillForm"),
   name: document.getElementById("skillName"),
   content: document.getElementById("skillContent"),
-  category: document.getElementById("skillCategory"),
   formError: document.getElementById("formError"),
   saveBtn: document.getElementById("saveBtn"),
   cancelEditBtn: document.getElementById("cancelEditBtn"),
@@ -24,7 +16,6 @@ const els = {
   emptyState: document.getElementById("emptyState"),
   noResultsState: document.getElementById("noResultsState"),
   toast: document.getElementById("toast"),
-  categoryChips: document.getElementById("categoryChips"),
   exportBtn: document.getElementById("exportBtn"),
   importBtn: document.getElementById("importBtn"),
   importFileInput: document.getElementById("importFileInput"),
@@ -35,7 +26,7 @@ const state = {
   skills: [],
   editingId: null,
   searchTerm: "",
-  categoryFilter: "all",
+  saving: false,
 };
 
 let toastTimer = null;
@@ -66,14 +57,16 @@ function resetForm() {
 }
 
 function enterEditMode(skill) {
+  if (state.saving) return;
   state.editingId = skill.id;
   els.name.value = skill.name;
   els.content.value = skill.content;
-  els.category.value = skill.category;
   clearFormError();
 
+  document.getElementById("editorTitle").textContent = "แก้ไข Skill";
+  document.getElementById("editorDialog").showModal();
   els.formSection.classList.add("editing");
-  els.saveBtn.textContent = "🔄 อัปเดต skill";
+  els.saveBtn.textContent = "อัปเดต Skill";
   els.cancelEditBtn.hidden = false;
   els.name.focus();
 }
@@ -81,8 +74,8 @@ function enterEditMode(skill) {
 function exitEditMode() {
   state.editingId = null;
   els.formSection.classList.remove("editing");
-  els.saveBtn.textContent = "💾 บันทึก skill";
-  els.cancelEditBtn.hidden = true;
+  els.saveBtn.textContent = "บันทึก Skill";
+  document.getElementById("editorDialog").close();
   resetForm();
 }
 
@@ -91,18 +84,11 @@ function matchesSearch(skill, term) {
   const haystack = [
     skill.name,
     skill.content,
-    CATEGORY_LABELS[skill.category] || skill.category,
-    skill.category,
     ...(Array.isArray(skill.tags) ? skill.tags : []),
   ]
     .join(" ")
     .toLowerCase();
   return haystack.includes(term.toLowerCase());
-}
-
-function matchesCategory(skill, categoryFilter) {
-  if (categoryFilter === "all") return true;
-  return skill.category === categoryFilter;
 }
 
 function createSkillItem(skill) {
@@ -130,42 +116,39 @@ function createSkillItem(skill) {
   const nameEl = document.createElement("div");
   nameEl.className = "skill-name";
   nameEl.textContent = skill.name; // textContent ป้องกัน XSS
-  const categoryEl = document.createElement("span");
-  categoryEl.className = "skill-category";
-  categoryEl.textContent = CATEGORY_LABELS[skill.category] || skill.category;
   info.appendChild(nameEl);
-  info.appendChild(categoryEl);
 
   const actions = document.createElement("div");
   actions.className = "skill-actions";
   actions.draggable = false; // กันไม่ให้การคลิกปุ่มในการ์ดไปเริ่ม drag โดยไม่ตั้งใจ
 
   const useBtn = document.createElement("button");
-  useBtn.className = "icon-btn";
+  useBtn.className = "icon-btn use-btn";
   useBtn.type = "button";
   useBtn.title = "ใช้ใน AI";
-  useBtn.textContent = "🚀";
+  useBtn.textContent = "ใช้ Prompt ↗";
   useBtn.addEventListener("click", () => handleUse(skill));
 
   const editBtn = document.createElement("button");
   editBtn.className = "icon-btn";
   editBtn.type = "button";
   editBtn.title = "แก้ไข";
-  editBtn.textContent = "✏️";
+  editBtn.textContent = "แก้ไข";
   editBtn.addEventListener("click", () => enterEditMode(skill));
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "icon-btn";
   copyBtn.type = "button";
   copyBtn.title = "คัดลอก";
-  copyBtn.textContent = "📋";
+  copyBtn.textContent = "คัดลอก";
   copyBtn.addEventListener("click", () => handleCopy(skill));
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "icon-btn";
   deleteBtn.type = "button";
   deleteBtn.title = "ลบ";
-  deleteBtn.textContent = "🗑️";
+  deleteBtn.textContent = "ลบ";
+  deleteBtn.classList.add("delete-btn");
   deleteBtn.addEventListener("click", () => handleDelete(skill));
 
   actions.appendChild(useBtn);
@@ -174,7 +157,7 @@ function createSkillItem(skill) {
   actions.appendChild(deleteBtn);
 
   top.appendChild(info);
-  top.appendChild(actions);
+
 
   const preview = document.createElement("div");
   preview.className = "skill-content-preview";
@@ -182,13 +165,25 @@ function createSkillItem(skill) {
 
   li.appendChild(top);
   li.appendChild(preview);
+  const readBtn = document.createElement("button");
+  readBtn.type = "button";
+  readBtn.className = "read-btn";
+  readBtn.textContent = "อ่านเนื้อหาเต็ม";
+  readBtn.setAttribute("aria-label", `อ่านเนื้อหาเต็ม: ${skill.name}`);
+  readBtn.addEventListener("click", () => {
+    document.getElementById("previewTitle").textContent = skill.name;
+    document.getElementById("previewContent").textContent = skill.content;
+    document.getElementById("previewDialog").showModal();
+  });
+  li.appendChild(readBtn);
+  li.appendChild(actions);
 
   return li;
 }
 
 function render() {
   const filtered = state.skills.filter(
-    (s) => matchesSearch(s, state.searchTerm) && matchesCategory(s, state.categoryFilter)
+    (s) => matchesSearch(s, state.searchTerm)
   );
   const sorted = [...filtered].sort((a, b) => b.updatedAt - a.updatedAt);
 
@@ -196,7 +191,7 @@ function render() {
 
   const hasAnySkills = state.skills.length > 0;
   const hasResults = sorted.length > 0;
-  const hasActiveFilter = Boolean(state.searchTerm) || state.categoryFilter !== "all";
+  const hasActiveFilter = Boolean(state.searchTerm);
 
   els.emptyState.hidden = hasAnySkills;
   els.noResultsState.hidden = !hasAnySkills || hasResults;
@@ -204,7 +199,7 @@ function render() {
   if (hasActiveFilter) {
     els.resultCount.textContent = `พบ ${sorted.length} skills`;
   } else {
-    els.resultCount.textContent = "";
+    els.resultCount.textContent = `${state.skills.length} Skills พร้อมใช้งาน`;
   }
 
   if (!hasResults) return;
@@ -224,14 +219,14 @@ async function refresh() {
 async function handleUse(skill) {
   let tab;
   try {
-    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = await window.SkilltapeWindow.getTargetTab();
   } catch (e) {
-    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
     return;
   }
 
   if (!tab || !tab.id) {
-    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
     return;
   }
 
@@ -270,11 +265,11 @@ async function handleDelete(skill) {
 
 async function handleSubmit(event) {
   event.preventDefault();
+  if (state.saving) return;
   clearFormError();
 
   const name = els.name.value.trim();
   const content = els.content.value.trim();
-  const category = els.category.value;
 
   if (!name) {
     showFormError("กรุณาระบุชื่อ skill");
@@ -286,25 +281,32 @@ async function handleSubmit(event) {
   }
 
   const isEditing = Boolean(state.editingId);
+  state.saving = true;
+  const controls = [...els.form.querySelectorAll("input, textarea, select, button")];
+  controls.forEach(control => { control.disabled = true; });
+  els.saveBtn.textContent = "กำลังบันทึก…";
 
   try {
     if (isEditing) {
       await window.SkilltapeStorage.updateSkill(state.editingId, {
         name,
         content,
-        category,
       });
       exitEditMode();
       await refresh();
       showToast("อัปเดตแล้ว");
     } else {
-      await window.SkilltapeStorage.saveSkill({ name, content, category });
-      resetForm();
+      await window.SkilltapeStorage.saveSkill({ name, content });
+      exitEditMode();
       await refresh();
       showToast("บันทึกแล้ว");
     }
   } catch (e) {
     showFormError(e.message || "บันทึกไม่สำเร็จ");
+  } finally {
+    state.saving = false;
+    controls.forEach(control => { control.disabled = false; });
+    els.saveBtn.textContent = state.editingId ? "อัปเดต Skill" : "บันทึก Skill";
   }
 }
 
@@ -314,17 +316,6 @@ function handleSearchInput() {
     state.searchTerm = els.searchInput.value.trim();
     render();
   }, SEARCH_DEBOUNCE_MS);
-}
-
-function handleCategoryChipClick(event) {
-  const chip = event.target.closest(".chip");
-  if (!chip) return;
-
-  state.categoryFilter = chip.dataset.category;
-  for (const el of els.categoryChips.querySelectorAll(".chip")) {
-    el.classList.toggle("is-active", el === chip);
-  }
-  render();
 }
 
 function todayStamp() {
@@ -364,31 +355,83 @@ async function handleImportFileChange(event) {
   els.importFileInput.value = ""; // ให้เลือกไฟล์เดิมซ้ำได้อีกครั้ง
   if (!file) return;
 
-  const replaceAll = window.confirm(
-    'นำเข้าไฟล์นี้อย่างไร?\nกด "ตกลง" เพื่อแทนที่ข้อมูลทั้งหมด\nกด "ยกเลิก" เพื่อรวมกับข้อมูลเดิม (merge)'
-  );
+  document.getElementById("importError").hidden = true;
+  pendingImportFile = file;
+  document.getElementById("importDialog").showModal();
+}
+
+let pendingImportFile = null;
+let importing = false;
+function cancelImport() {
+  if (importing) return;
+  pendingImportFile = null;
+  document.getElementById("importDialog").close();
+}
+
+async function confirmImport(mode) {
+  if (!pendingImportFile || importing) return;
+  if (mode === "replace" && !window.confirm("แทนที่ Skills เดิมทั้งหมด? แนะนำให้ Export สำรองข้อมูลก่อน")) return;
+  const file = pendingImportFile;
+  importing = true;
+  document.getElementById("importError").hidden = true;
+  const buttons = document.getElementById("importDialog").querySelectorAll("button");
+  buttons.forEach(button => { button.disabled = true; });
 
   try {
     const text = await file.text();
     await window.SkilltapeStorage.importJSON(text, {
-      mode: replaceAll ? "replace" : "merge",
+      mode,
     });
     if (state.editingId) {
       exitEditMode();
     }
     await refresh();
+    pendingImportFile = null;
+    document.getElementById("importDialog").close();
     showToast("Import สำเร็จ");
   } catch (e) {
-    showToast(e.message || "Import ไม่สำเร็จ");
+    const error = document.getElementById("importError");
+    error.textContent = e.message || "Import ไม่สำเร็จ";
+    error.hidden = false;
+  } finally {
+    importing = false;
+    buttons.forEach(button => { button.disabled = false; });
   }
 }
+
+document.getElementById("mergeImportBtn").addEventListener("click", () => confirmImport("merge"));
+document.getElementById("replaceImportBtn").addEventListener("click", () => confirmImport("replace"));
+document.getElementById("cancelImportBtn").addEventListener("click", cancelImport);
+document.getElementById("importDialog").addEventListener("cancel", event => {
+  event.preventDefault();
+  cancelImport();
+});
+
+document.getElementById("closePreviewBtn").addEventListener("click", () => document.getElementById("previewDialog").close());
+
+document.getElementById("addSkillBtn").addEventListener("click", () => {
+  exitEditMode();
+  document.getElementById("editorTitle").textContent = "เพิ่ม Skill";
+  document.getElementById("editorDialog").showModal();
+  els.name.focus();
+});
+document.getElementById("editorDialog").addEventListener("cancel", event => {
+  event.preventDefault();
+  if (!state.saving) exitEditMode();
+});
 
 els.form.addEventListener("submit", handleSubmit);
 els.cancelEditBtn.addEventListener("click", exitEditMode);
 els.searchInput.addEventListener("input", handleSearchInput);
-els.categoryChips.addEventListener("click", handleCategoryChipClick);
 els.exportBtn.addEventListener("click", handleExport);
 els.importBtn.addEventListener("click", handleImportClick);
 els.importFileInput.addEventListener("change", handleImportFileChange);
+
+// Keep a detached library up to date without resetting an open editor.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.skills) {
+    return refresh().catch(() => showToast("โหลดรายการไม่สำเร็จ ลองเปิดใหม่"));
+  }
+});
 
 refresh();

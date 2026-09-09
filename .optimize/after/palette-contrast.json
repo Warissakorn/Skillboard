@@ -1,0 +1,18 @@
+{
+  "light": {
+    "fg/card-bg": 14.1,
+    "muted/bg": 5.54,
+    "muted/card-bg": 6.06,
+    "accent-fg/accent": 8.72,
+    "accent/card-bg": 8.72,
+    "danger/card-bg": 6.51
+  },
+  "dark": {
+    "fg/card-bg": 13.19,
+    "muted/bg": 8.85,
+    "muted/card-bg": 7.72,
+    "accent-fg/accent": 8.94,
+    "accent/card-bg": 8.64,
+    "danger/card-bg": 8.24
+  }
+}
