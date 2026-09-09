@@ -77,7 +77,7 @@ function enterEditMode(skill) {
   document.getElementById("editorTitle").textContent = "แก้ไข Skill";
   document.getElementById("editorDialog").showModal();
   els.formSection.classList.add("editing");
-  els.saveBtn.textContent = "🔄 อัปเดต skill";
+  els.saveBtn.textContent = "อัปเดต Skill";
   els.cancelEditBtn.hidden = false;
   els.name.focus();
 }
@@ -85,7 +85,7 @@ function enterEditMode(skill) {
 function exitEditMode() {
   state.editingId = null;
   els.formSection.classList.remove("editing");
-  els.saveBtn.textContent = "💾 บันทึก skill";
+  els.saveBtn.textContent = "บันทึก Skill";
   document.getElementById("editorDialog").close();
   resetForm();
 }
@@ -391,6 +391,7 @@ async function handleImportFileChange(event) {
   els.importFileInput.value = ""; // ให้เลือกไฟล์เดิมซ้ำได้อีกครั้ง
   if (!file) return;
 
+  document.getElementById("importError").hidden = true;
   pendingImportFile = file;
   document.getElementById("importDialog").showModal();
 }
@@ -408,6 +409,7 @@ async function confirmImport(mode) {
   if (mode === "replace" && !window.confirm("แทนที่ Skills เดิมทั้งหมด? แนะนำให้ Export สำรองข้อมูลก่อน")) return;
   const file = pendingImportFile;
   importing = true;
+  document.getElementById("importError").hidden = true;
   const buttons = document.getElementById("importDialog").querySelectorAll("button");
   buttons.forEach(button => { button.disabled = true; });
 
@@ -424,7 +426,9 @@ async function confirmImport(mode) {
     document.getElementById("importDialog").close();
     showToast("Import สำเร็จ");
   } catch (e) {
-    showToast(e.message || "Import ไม่สำเร็จ");
+    const error = document.getElementById("importError");
+    error.textContent = e.message || "Import ไม่สำเร็จ";
+    error.hidden = false;
   } finally {
     importing = false;
     buttons.forEach(button => { button.disabled = false; });

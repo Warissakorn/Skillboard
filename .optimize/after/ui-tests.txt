@@ -1,0 +1,17 @@
+✔ search covers Thai category, case-insensitive content and tags; category filters combine (2.885822ms)
+✔ empty and no-results states differ (0.885308ms)
+✔ blank submission is rejected and valid create saves trimmed values (1.400587ms)
+✔ edit updates existing id and keeps tags (1.447628ms)
+✔ import cancel performs zero writes; merge is explicit; replace requires confirmation (2.218293ms)
+✔ pending save blocks duplicate submit and failure allows retry without losing input (1.0125ms)
+✔ full reader preserves multiline prompt as text and closes explicitly (1.013612ms)
+✔ new editor opens on demand; Escape closes unless save is pending (0.985129ms)
+✔ import failures stay visible in dialog and permit retry (1.178681ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 106.392956

@@ -1,0 +1,44 @@
+# Optimization summary — Skilltape
+
+Base: `8e62d156586bf4ae98de3e76d08406b18bded8bb`
+
+Implemented approved items in separate commits: characterization tests, explicit
+import choices, duplicate-submit protection, library-first layout, readable card
+actions and full prompt reader. Follow-up verification adds dialog error feedback.
+
+| Measurement | Baseline | After |
+|---|---|---|
+| Existing storage assertions (in-memory Chrome mock) | 11/11 | 11/11 |
+| Popup characterization/regression tests (DOM mock) | 0 | 9/9 |
+| Two submissions while storage is pending: save calls | 2 | 1 |
+| Cancel import: import calls | 1 (merge) | 0 |
+| Form always above library | Yes | No; explicit Add/Edit dialog |
+
+Reproduce: `node --test tests/popup.test.cjs` and
+`node .optimize/baseline/measure.cjs`. Raw results are under `baseline/` and `after/`.
+The original measurement adapter was extended with no-op dialog methods so the
+same command can run against the updated DOM contract. Import cancellation is
+also exercised explicitly by the regression tests (Cancel and rejected Replace).
+
+No runtime dependency, storage schema, extension permission or content-insertion
+logic changes. No performance timing or rendered layout gain is claimed.
+
+## Outstanding Chrome visual / integration verification
+
+Cloud Browser blocked localhost (`ERR_BLOCKED_BY_CLIENT`) and file previews
+(URL security policy), so real layout, focus trapping, keyboard navigation,
+clipboard, downloads and extension-to-tab insertion remain unverified. Screenshots
+in README are clearly labeled as the previous UI. This change should stay a draft
+until these checks are completed in a clean Chrome extension profile:
+
+- Open a populated library in light/dark system themes at the 420 × 580 popup size;
+  verify scrolling, long Thai titles, focus indicators and readable card buttons.
+- Add, edit, cancel, Escape and read a multiline prompt; verify focus returns to
+  the trigger and no markup is executed from stored content.
+- Import merge, cancel and replace (with confirmation), invalid JSON and failed
+  storage; confirm error text remains inside the open dialog and retry works.
+- Double-click Save with delayed storage; verify only one item and retained form
+  input after an error.
+- Copy, Export, delete and Use Prompt on a test page; verify insertion keeps text.
+
+No new benchmark/CI gate was added.
