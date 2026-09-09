@@ -364,24 +364,53 @@ async function handleImportFileChange(event) {
   els.importFileInput.value = ""; // ให้เลือกไฟล์เดิมซ้ำได้อีกครั้ง
   if (!file) return;
 
-  const replaceAll = window.confirm(
-    'นำเข้าไฟล์นี้อย่างไร?\nกด "ตกลง" เพื่อแทนที่ข้อมูลทั้งหมด\nกด "ยกเลิก" เพื่อรวมกับข้อมูลเดิม (merge)'
-  );
+  pendingImportFile = file;
+  document.getElementById("importDialog").showModal();
+}
+
+let pendingImportFile = null;
+let importing = false;
+function cancelImport() {
+  if (importing) return;
+  pendingImportFile = null;
+  document.getElementById("importDialog").close();
+}
+
+async function confirmImport(mode) {
+  if (!pendingImportFile || importing) return;
+  if (mode === "replace" && !window.confirm("แทนที่ Skills เดิมทั้งหมด? แนะนำให้ Export สำรองข้อมูลก่อน")) return;
+  const file = pendingImportFile;
+  importing = true;
+  const buttons = document.getElementById("importDialog").querySelectorAll("button");
+  buttons.forEach(button => { button.disabled = true; });
 
   try {
     const text = await file.text();
     await window.SkilltapeStorage.importJSON(text, {
-      mode: replaceAll ? "replace" : "merge",
+      mode,
     });
     if (state.editingId) {
       exitEditMode();
     }
     await refresh();
+    pendingImportFile = null;
+    document.getElementById("importDialog").close();
     showToast("Import สำเร็จ");
   } catch (e) {
     showToast(e.message || "Import ไม่สำเร็จ");
+  } finally {
+    importing = false;
+    buttons.forEach(button => { button.disabled = false; });
   }
 }
+
+document.getElementById("mergeImportBtn").addEventListener("click", () => confirmImport("merge"));
+document.getElementById("replaceImportBtn").addEventListener("click", () => confirmImport("replace"));
+document.getElementById("cancelImportBtn").addEventListener("click", cancelImport);
+document.getElementById("importDialog").addEventListener("cancel", event => {
+  event.preventDefault();
+  cancelImport();
+});
 
 els.form.addEventListener("submit", handleSubmit);
 els.cancelEditBtn.addEventListener("click", exitEditMode);

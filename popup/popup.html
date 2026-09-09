@@ -70,6 +70,15 @@
     <input id="importFileInput" type="file" accept=".json,application/json" hidden />
   </footer>
 
+  <dialog id="importDialog" aria-labelledby="importTitle">
+    <h2 id="importTitle">นำเข้า Skills</h2>
+    <p>เลือกวิธีนำเข้าไฟล์ของคุณ การแทนที่จะลบรายการเดิมทั้งหมด</p>
+    <div class="dialog-actions">
+      <button id="mergeImportBtn" type="button">รวมกับข้อมูลเดิม</button>
+      <button id="replaceImportBtn" type="button">แทนที่ทั้งหมด</button>
+      <button id="cancelImportBtn" type="button">ยกเลิก</button>
+    </div>
+  </dialog>
   <script src="../utils/storage.js"></script>
   <script src="popup.js"></script>
 </body>
