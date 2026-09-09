@@ -40,10 +40,10 @@ body {
   flex-direction:column;
   background:var(--bg);
   color:var(--fg);
-  font:13px/1.55 "Segoe UI","Noto Sans Thai",system-ui,sans-serif;
+  font:16px/1.6 "Segoe UI","Noto Sans Thai",system-ui,sans-serif;
 }
 
-button,input,textarea,select {
+button,input,textarea {
   font:inherit;
 }
 
@@ -57,7 +57,7 @@ button:disabled {
   cursor:wait;
 }
 
-button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {
+button:focus-visible,input:focus-visible,textarea:focus-visible {
   outline:3px solid var(--accent);
   outline-offset:3px;
 }
@@ -95,14 +95,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 .app-header h1 {
   margin:0;
-  font-size:19px;
+  font-size:21px;
   letter-spacing:-.5px;
 }
 
 .tagline {
   margin:0;
   color:var(--muted);
-  font-size:10px;
+  font-size:12px;
 }
 
 .primary-btn,#saveBtn {
@@ -125,7 +125,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 .section-label {
   display:block;
-  font-size:12px;
+  font-size:14px;
   font-weight:600;
   margin:5px 0 9px;
 }
@@ -134,7 +134,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   flex-shrink:0;
 }
 
-#searchInput,.field input,.field textarea,.field select {
+#searchInput,.field input,.field textarea {
   width:100%;
   padding:10px 12px;
   border:1px solid var(--border);
@@ -144,40 +144,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 }
 
 #searchInput {
-  height:42px;
+  height:46px;
   box-shadow:var(--shadow);
-}
-
-.category-chips {
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
-  margin:12px 0 9px;
-}
-
-.chip {
-  border:1px solid transparent;
-  background:transparent;
-  color:var(--muted);
-  border-radius:8px;
-  padding:6px 9px;
-  font-size:12px;
-}
-
-.chip:hover {
-  background:var(--card-bg);
-}
-
-.chip.is-active {
-  background:var(--soft);
-  color:var(--accent);
-  font-weight:600;
 }
 
 .result-count {
   color:var(--muted);
-  font-size:11px;
-  margin:0 0 12px;
+  font-size:14px;
+  margin:10px 0 12px;
 }
 
 .list-section {
@@ -221,28 +195,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 .skill-name {
   font-weight:650;
-  font-size:14px;
+  font-size:17px;
   overflow-wrap:anywhere;
-}
-
-.skill-category {
-  display:inline-block;
-  font-size:10px;
-  color:var(--accent);
-  margin-top:4px;
-  background:var(--soft);
-  border-radius:5px;
-  padding:2px 7px;
 }
 
 .skill-content-preview {
   color:var(--muted);
-  font-size:12px;
+  font-size:14px;
   line-height:1.65;
   margin:10px 0;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
-  max-height:60px;
+  max-height:3.3em;
   overflow:hidden;
 }
 
@@ -258,7 +222,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   padding:6px 8px;
   color:var(--fg);
   background:var(--card-bg);
-  font-size:12px;
+  font-size:14px;
   min-height:32px;
 }
 
@@ -289,7 +253,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   background:transparent;
   color:var(--muted);
   padding:8px;
-  font-size:12px;
+  font-size:14px;
 }
 
 .footer-btn:hover {
@@ -308,7 +272,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   color:var(--bg);
   border-radius:12px;
   box-shadow:var(--shadow);
-  font-size:12px;
+  font-size:14px;
   overflow-wrap:anywhere;
 }
 
@@ -318,7 +282,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 .field label {
   display:block;
-  font-size:12px;
+  font-size:14px;
   font-weight:600;
   margin-bottom:6px;
 }
@@ -341,7 +305,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 .form-error {
   color:var(--danger);
-  font-size:12px;
+  font-size:14px;
 }
 
 dialog {
@@ -362,14 +326,14 @@ dialog::backdrop {
 }
 
 dialog h2 {
-  font-size:19px;
+  font-size:21px;
   letter-spacing:-.3px;
   margin:0 0 10px;
 }
 
 dialog p {
   color:var(--muted);
-  font-size:12px;
+  font-size:14px;
 }
 
 .dialog-actions {
@@ -441,7 +405,7 @@ dialog p {
   background:none;
   color:var(--accent);
   padding:2px 0;
-  font-size:11px;
+  font-size:14px;
 }
 
 .read-btn:hover {
@@ -452,7 +416,7 @@ dialog p {
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   line-height:1.8;
-  font-size:13px;
+  font-size:16px;
   margin:18px 0 24px;
 }
 

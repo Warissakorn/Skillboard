@@ -1,12 +1,5 @@
 // popup.js — เพิ่ม/แสดง/ค้นหา/แก้ไข/ลบ/คัดลอก/ใช้ skill และ export/import
 
-const CATEGORY_LABELS = {
-  general: "ทั่วไป",
-  coding: "โค้ดดิ้ง",
-  writing: "งานเขียน",
-  business: "ธุรกิจ",
-};
-
 const SEARCH_DEBOUNCE_MS = 150;
 
 const els = {
@@ -14,7 +7,6 @@ const els = {
   form: document.getElementById("skillForm"),
   name: document.getElementById("skillName"),
   content: document.getElementById("skillContent"),
-  category: document.getElementById("skillCategory"),
   formError: document.getElementById("formError"),
   saveBtn: document.getElementById("saveBtn"),
   cancelEditBtn: document.getElementById("cancelEditBtn"),
@@ -24,7 +16,6 @@ const els = {
   emptyState: document.getElementById("emptyState"),
   noResultsState: document.getElementById("noResultsState"),
   toast: document.getElementById("toast"),
-  categoryChips: document.getElementById("categoryChips"),
   exportBtn: document.getElementById("exportBtn"),
   importBtn: document.getElementById("importBtn"),
   importFileInput: document.getElementById("importFileInput"),
@@ -35,7 +26,6 @@ const state = {
   skills: [],
   editingId: null,
   searchTerm: "",
-  categoryFilter: "all",
   saving: false,
 };
 
@@ -71,7 +61,6 @@ function enterEditMode(skill) {
   state.editingId = skill.id;
   els.name.value = skill.name;
   els.content.value = skill.content;
-  els.category.value = skill.category;
   clearFormError();
 
   document.getElementById("editorTitle").textContent = "แก้ไข Skill";
@@ -95,18 +84,11 @@ function matchesSearch(skill, term) {
   const haystack = [
     skill.name,
     skill.content,
-    CATEGORY_LABELS[skill.category] || skill.category,
-    skill.category,
     ...(Array.isArray(skill.tags) ? skill.tags : []),
   ]
     .join(" ")
     .toLowerCase();
   return haystack.includes(term.toLowerCase());
-}
-
-function matchesCategory(skill, categoryFilter) {
-  if (categoryFilter === "all") return true;
-  return skill.category === categoryFilter;
 }
 
 function createSkillItem(skill) {
@@ -134,11 +116,7 @@ function createSkillItem(skill) {
   const nameEl = document.createElement("div");
   nameEl.className = "skill-name";
   nameEl.textContent = skill.name; // textContent ป้องกัน XSS
-  const categoryEl = document.createElement("span");
-  categoryEl.className = "skill-category";
-  categoryEl.textContent = CATEGORY_LABELS[skill.category] || skill.category;
   info.appendChild(nameEl);
-  info.appendChild(categoryEl);
 
   const actions = document.createElement("div");
   actions.className = "skill-actions";
@@ -205,7 +183,7 @@ function createSkillItem(skill) {
 
 function render() {
   const filtered = state.skills.filter(
-    (s) => matchesSearch(s, state.searchTerm) && matchesCategory(s, state.categoryFilter)
+    (s) => matchesSearch(s, state.searchTerm)
   );
   const sorted = [...filtered].sort((a, b) => b.updatedAt - a.updatedAt);
 
@@ -213,7 +191,7 @@ function render() {
 
   const hasAnySkills = state.skills.length > 0;
   const hasResults = sorted.length > 0;
-  const hasActiveFilter = Boolean(state.searchTerm) || state.categoryFilter !== "all";
+  const hasActiveFilter = Boolean(state.searchTerm);
 
   els.emptyState.hidden = hasAnySkills;
   els.noResultsState.hidden = !hasAnySkills || hasResults;
@@ -292,7 +270,6 @@ async function handleSubmit(event) {
 
   const name = els.name.value.trim();
   const content = els.content.value.trim();
-  const category = els.category.value;
 
   if (!name) {
     showFormError("กรุณาระบุชื่อ skill");
@@ -314,13 +291,12 @@ async function handleSubmit(event) {
       await window.SkilltapeStorage.updateSkill(state.editingId, {
         name,
         content,
-        category,
       });
       exitEditMode();
       await refresh();
       showToast("อัปเดตแล้ว");
     } else {
-      await window.SkilltapeStorage.saveSkill({ name, content, category });
+      await window.SkilltapeStorage.saveSkill({ name, content });
       exitEditMode();
       await refresh();
       showToast("บันทึกแล้ว");
@@ -340,18 +316,6 @@ function handleSearchInput() {
     state.searchTerm = els.searchInput.value.trim();
     render();
   }, SEARCH_DEBOUNCE_MS);
-}
-
-function handleCategoryChipClick(event) {
-  const chip = event.target.closest(".chip");
-  if (!chip) return;
-
-  state.categoryFilter = chip.dataset.category;
-  for (const el of els.categoryChips.querySelectorAll(".chip")) {
-    el.classList.toggle("is-active", el === chip);
-    el.setAttribute("aria-pressed", String(el === chip));
-  }
-  render();
 }
 
 function todayStamp() {
@@ -459,7 +423,6 @@ document.getElementById("editorDialog").addEventListener("cancel", event => {
 els.form.addEventListener("submit", handleSubmit);
 els.cancelEditBtn.addEventListener("click", exitEditMode);
 els.searchInput.addEventListener("input", handleSearchInput);
-els.categoryChips.addEventListener("click", handleCategoryChipClick);
 els.exportBtn.addEventListener("click", handleExport);
 els.importBtn.addEventListener("click", handleImportClick);
 els.importFileInput.addEventListener("change", handleImportFileChange);

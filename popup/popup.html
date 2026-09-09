@@ -17,22 +17,15 @@
       <input
         id="searchInput"
         type="search"
-        placeholder="ค้นหาชื่อ เนื้อหา หรือหมวดหมู่…"
+        placeholder="ค้นหาชื่อหรือเนื้อหา Prompt…"
       />
-      <div id="categoryChips" class="category-chips">
-        <button type="button" aria-pressed="true" class="chip is-active" data-category="all">ทั้งหมด</button>
-        <button type="button" aria-pressed="false" class="chip" data-category="general">ทั่วไป</button>
-        <button type="button" aria-pressed="false" class="chip" data-category="coding">โค้ดดิ้ง</button>
-        <button type="button" aria-pressed="false" class="chip" data-category="writing">งานเขียน</button>
-        <button type="button" aria-pressed="false" class="chip" data-category="business">ธุรกิจ</button>
-      </div>
       <p aria-live="polite" id="resultCount" class="result-count"></p>
     </section>
 
     <section class="list-section">
       <ul id="skillList"></ul>
       <p id="emptyState" class="empty-state" hidden>ยังไม่มี Skill — กด “＋ เพิ่ม Skill” เพื่อเก็บ Prompt แรกของคุณ</p>
-      <p id="noResultsState" class="empty-state" hidden>ไม่พบ Skill ลองเปลี่ยนคำค้นหรือเลือกหมวดหมู่ “ทั้งหมด”</p>
+      <p id="noResultsState" class="empty-state" hidden>ไม่พบ Skill ลองเปลี่ยนคำค้นหรือล้างช่องค้นหา</p>
     </section>
 
     <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
@@ -54,15 +47,6 @@
         <div class="field">
           <label for="skillContent">เนื้อหา</label>
           <textarea id="skillContent" rows="4" placeholder="วางเนื้อหา skill/prompt ที่นี่..."></textarea>
-        </div>
-        <div class="field">
-          <label for="skillCategory">หมวดหมู่</label>
-          <select id="skillCategory">
-            <option value="general">ทั่วไป</option>
-            <option value="coding">โค้ดดิ้ง</option>
-            <option value="writing">งานเขียน</option>
-            <option value="business">ธุรกิจ</option>
-          </select>
         </div>
         <p id="formError" role="alert" class="form-error" hidden></p>
         <div class="form-actions">

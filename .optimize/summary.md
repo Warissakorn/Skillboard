@@ -42,3 +42,17 @@ until these checks are completed in a clean Chrome extension profile:
 - Copy, Export, delete and Use Prompt on a test page; verify insertion keeps text.
 
 No new benchmark/CI gate was added.
+
+## Follow-up: larger type and no category UI
+
+Requested follow-up removes category controls, badges and category search matching.
+Existing category metadata is preserved during edits/import/export for backward
+compatibility; it is no longer used by the popup.
+
+CSS values (source inspection, not rendered measurements): base 13 → 16px, skill
+titles 14 → 17px, card preview/buttons 12 → 14px, full reader 13 → 16px. Removed
+category filters free vertical space; preview uses a relative two-line height.
+
+Updated existing tests for the explicitly requested search behavior and verified
+legacy metadata preservation. UI 9/9 and storage 11/11 pass with mocks. Browser
+visual verification remains outstanding due to the previously documented block.
