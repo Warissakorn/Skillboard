@@ -15,6 +15,7 @@ Runtime: v24.19.0 ; Chrome storage mocked in memory
 สรุปผลทดสอบ: ผ่าน 11/11
 Import with confirm=false (Cancel): []
 Two submits before storage resolves: saveSkill calls = 1
-UI/content test files: .optimize/baseline/ui-tests.txt
+UI/content test files: .optimize/after/ui-tests.txt
+.optimize/baseline/ui-tests.txt
 tests/popup.test.cjs
 utils/storage.test.js

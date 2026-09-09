@@ -13,7 +13,7 @@ const context = vm.createContext({window:{}, console, crypto:require('node:crypt
   let imports=[];
   let saved=[];
   let releases=[];
-  const c=vm.createContext({window:{confirm:()=>false,SkilltapeStorage:{importJSON:async(text,options)=>imports.push(options.mode),getSkills:async()=>[],saveSkill:async s=>{saved.push(s);await new Promise(r=>releases.push(r));}}},document:{querySelector:el,getElementById:el},console,setTimeout:()=>1,clearTimeout(){}});
+  const c=vm.createContext({window:{confirm:()=>false,SkilltapeStorage:{importJSON:async(text,options)=>imports.push(options.mode),getSkills:async()=>[],saveSkill:async s=>{saved.push(s);await new Promise(r=>releases.push(r));}}},document:{querySelector:el,getElementById:el},chrome:{storage:{onChanged:{addListener(){}}}},console,setTimeout:()=>1,clearTimeout(){}});
   let js=fs.readFileSync('popup/popup.js','utf8').replace(/refresh\(\);\s*$/,'');
   vm.runInContext(js,c);
   vm.runInContext('refresh = async () => {};',c);

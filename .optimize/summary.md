@@ -56,3 +56,19 @@ category filters free vertical space; preview uses a relative two-line height.
 Updated existing tests for the explicitly requested search behavior and verified
 legacy metadata preservation. UI 9/9 and storage 11/11 pass with mocks. Browser
 visual verification remains outstanding due to the previously documented block.
+
+## Follow-up: detached mini window and denser layout
+
+- Added explicit mini-window action, 360 × 480 outer window requested via
+  chrome.windows.create. Actual client dimensions depend on OS window borders.
+- Mini mode fills the resizable viewport; Use targets the active tab in the source
+  browser window, never the extension window. Failed opening retains the popup.
+- Removed decorative tagline/duplicate visible section label; retained accessible
+  search label. Reduced card and toolbar padding, action buttons target 28px CSS
+  height and search field 46 → 36px; body/card title remain 16/17px. These are CSS
+  dimensions, not browser-measured improvements.
+- Storage changes refresh an open library without resetting a draft editor.
+- No new permissions. API reference: https://developer.chrome.com/docs/extensions/reference/api/windows
+- Run node --test tests/*.test.cjs (16 passed) plus existing storage assertions
+  (11 passed). Browser/OS window behavior and visual layout still need manual
+  verification in Chrome; previous preview policy block remains unresolved.

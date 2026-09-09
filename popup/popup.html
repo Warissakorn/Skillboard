@@ -7,13 +7,16 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">S</span><div><h1>Skilltape</h1><p class="tagline">Your prompts, ready to play.</p></div></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">S</span><div><h1>Skilltape</h1></div></div>
+    <div class="header-actions">
+    <button id="miniWindowBtn" class="footer-btn" type="button" title="เปิดค้างและปรับขนาดได้ ใช้ Prompt กับแท็บที่เลือกในหน้าต่างเดิม">หน้าต่างย่อ ↗</button>
     <button id="addSkillBtn" class="primary-btn" type="button">＋ เพิ่ม Skill</button>
+    </div>
   </header>
 
   <main id="app">
     <section class="search-section">
-      <label class="section-label" for="searchInput">คลัง Prompt ของคุณ</label>
+      <label class="visually-hidden" for="searchInput">คลัง Prompt ของคุณ</label>
       <input
         id="searchInput"
         type="search"
@@ -73,6 +76,7 @@
     </div>
   </dialog>
   <script src="../utils/storage.js"></script>
+  <script src="window-mode.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

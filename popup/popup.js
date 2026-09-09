@@ -219,14 +219,14 @@ async function refresh() {
 async function handleUse(skill) {
   let tab;
   try {
-    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = await window.SkilltapeWindow.getTargetTab();
   } catch (e) {
-    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
     return;
   }
 
   if (!tab || !tab.id) {
-    showToast("ไม่พบแท็บที่ใช้งานอยู่");
+    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
     return;
   }
 
@@ -426,5 +426,12 @@ els.searchInput.addEventListener("input", handleSearchInput);
 els.exportBtn.addEventListener("click", handleExport);
 els.importBtn.addEventListener("click", handleImportClick);
 els.importFileInput.addEventListener("change", handleImportFileChange);
+
+// Keep a detached library up to date without resetting an open editor.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.skills) {
+    return refresh().catch(() => showToast("โหลดรายการไม่สำเร็จ ลองเปิดใหม่"));
+  }
+});
 
 refresh();
