@@ -9,7 +9,7 @@ const context = vm.createContext({window:{}, console, crypto:require('node:crypt
   vm.runInContext(fs.readFileSync('utils/storage.test.js','utf8'),context);
   if(!await context.window.runStorageTests()) process.exitCode=1;
   const elements = new Map();
-  function el(id){if(!elements.has(id))elements.set(id,{value:'',hidden:false,addEventListener(){},classList:{add(){},remove(){},toggle(){}},reset(){},focus(){},querySelectorAll(){return[];}});return elements.get(id);}
+  function el(id){if(!elements.has(id))elements.set(id,{value:'',hidden:false,addEventListener(){},classList:{add(){},remove(){},toggle(){}},reset(){},focus(){},showModal(){},close(){},querySelectorAll(){return[];}});return elements.get(id);}
   let imports=[];
   let saved=[];
   let releases=[];

@@ -36,6 +36,7 @@ const state = {
   editingId: null,
   searchTerm: "",
   categoryFilter: "all",
+  saving: false,
 };
 
 let toastTimer = null;
@@ -66,6 +67,7 @@ function resetForm() {
 }
 
 function enterEditMode(skill) {
+  if (state.saving) return;
   state.editingId = skill.id;
   els.name.value = skill.name;
   els.content.value = skill.content;
@@ -270,6 +272,7 @@ async function handleDelete(skill) {
 
 async function handleSubmit(event) {
   event.preventDefault();
+  if (state.saving) return;
   clearFormError();
 
   const name = els.name.value.trim();
@@ -286,6 +289,10 @@ async function handleSubmit(event) {
   }
 
   const isEditing = Boolean(state.editingId);
+  state.saving = true;
+  const controls = [...els.form.querySelectorAll("input, textarea, select, button")];
+  controls.forEach(control => { control.disabled = true; });
+  els.saveBtn.textContent = "กำลังบันทึก…";
 
   try {
     if (isEditing) {
@@ -305,6 +312,10 @@ async function handleSubmit(event) {
     }
   } catch (e) {
     showFormError(e.message || "บันทึกไม่สำเร็จ");
+  } finally {
+    state.saving = false;
+    controls.forEach(control => { control.disabled = false; });
+    els.saveBtn.textContent = state.editingId ? "อัปเดต Skill" : "บันทึก Skill";
   }
 }
 
