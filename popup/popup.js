@@ -63,10 +63,10 @@ function enterEditMode(skill) {
   els.content.value = skill.content;
   clearFormError();
 
-  document.getElementById("editorTitle").textContent = "แก้ไข Skill";
+  document.getElementById("editorTitle").textContent = t("แก้ไข Skill");
   document.getElementById("editorDialog").showModal();
   els.formSection.classList.add("editing");
-  els.saveBtn.textContent = "อัปเดต Skill";
+  els.saveBtn.textContent = t("อัปเดต Skill");
   els.cancelEditBtn.hidden = false;
   els.name.focus();
 }
@@ -74,7 +74,7 @@ function enterEditMode(skill) {
 function exitEditMode() {
   state.editingId = null;
   els.formSection.classList.remove("editing");
-  els.saveBtn.textContent = "บันทึก Skill";
+  els.saveBtn.textContent = t("บันทึก Skill");
   document.getElementById("editorDialog").close();
   resetForm();
 }
@@ -125,29 +125,29 @@ function createSkillItem(skill) {
   const useBtn = document.createElement("button");
   useBtn.className = "icon-btn use-btn";
   useBtn.type = "button";
-  useBtn.title = "ใช้ใน AI";
-  useBtn.textContent = "ใช้ Prompt ↗";
+  useBtn.title = t("ใช้ใน AI");
+  useBtn.textContent = t("ใช้ Prompt ↗");
   useBtn.addEventListener("click", () => handleUse(skill));
 
   const editBtn = document.createElement("button");
   editBtn.className = "icon-btn";
   editBtn.type = "button";
-  editBtn.title = "แก้ไข";
-  editBtn.textContent = "แก้ไข";
+  editBtn.title = t("แก้ไข");
+  editBtn.textContent = t("แก้ไข");
   editBtn.addEventListener("click", () => enterEditMode(skill));
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "icon-btn";
   copyBtn.type = "button";
-  copyBtn.title = "คัดลอก";
-  copyBtn.textContent = "คัดลอก";
+  copyBtn.title = t("คัดลอก");
+  copyBtn.textContent = t("คัดลอก");
   copyBtn.addEventListener("click", () => handleCopy(skill));
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "icon-btn";
   deleteBtn.type = "button";
-  deleteBtn.title = "ลบ";
-  deleteBtn.textContent = "ลบ";
+  deleteBtn.title = t("ลบ");
+  deleteBtn.textContent = t("ลบ");
   deleteBtn.classList.add("delete-btn");
   deleteBtn.addEventListener("click", () => handleDelete(skill));
 
@@ -168,8 +168,8 @@ function createSkillItem(skill) {
   const readBtn = document.createElement("button");
   readBtn.type = "button";
   readBtn.className = "read-btn";
-  readBtn.textContent = "อ่านเนื้อหาเต็ม";
-  readBtn.setAttribute("aria-label", `อ่านเนื้อหาเต็ม: ${skill.name}`);
+  readBtn.textContent = t("อ่านเนื้อหาเต็ม");
+  readBtn.setAttribute("aria-label", t("อ่านเนื้อหาเต็ม: {name}", {name: skill.name}));
   readBtn.addEventListener("click", () => {
     document.getElementById("previewTitle").textContent = skill.name;
     document.getElementById("previewContent").textContent = skill.content;
@@ -197,9 +197,9 @@ function render() {
   els.noResultsState.hidden = !hasAnySkills || hasResults;
 
   if (hasActiveFilter) {
-    els.resultCount.textContent = `พบ ${sorted.length} skills`;
+    els.resultCount.textContent = t("พบ {count} skills", {count: sorted.length});
   } else {
-    els.resultCount.textContent = `${state.skills.length} Skills พร้อมใช้งาน`;
+    els.resultCount.textContent = t("{count} Skills พร้อมใช้งาน", {count: state.skills.length});
   }
 
   if (!hasResults) return;
@@ -221,12 +221,12 @@ async function handleUse(skill) {
   try {
     tab = await window.SkilltapeWindow.getTargetTab();
   } catch (e) {
-    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
+    showToast(t("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ"));
     return;
   }
 
   if (!tab || !tab.id) {
-    showToast("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ");
+    showToast(t("ไม่พบแท็บต้นทาง เปิดหน้าต่างย่อใหม่จากหน้าแชทที่ต้องการ"));
     return;
   }
 
@@ -235,10 +235,10 @@ async function handleUse(skill) {
     { type: "INSERT_SKILL", text: skill.content },
     (response) => {
       if (chrome.runtime.lastError || !response || !response.success) {
-        showToast("ไม่พบช่องพิมพ์ข้อความในหน้านี้ ลองเปิดหน้าแชท AI ก่อนนะ");
+        showToast(t("ไม่พบช่องพิมพ์ข้อความในหน้านี้ ลองเปิดหน้าแชท AI ก่อนนะ"));
         return;
       }
-      showToast("แทรกแล้ว! กด Enter เพื่อส่ง");
+      showToast(t("แทรกแล้ว! กด Enter เพื่อส่ง"));
     }
   );
 }
@@ -246,21 +246,21 @@ async function handleUse(skill) {
 async function handleCopy(skill) {
   try {
     await navigator.clipboard.writeText(skill.content);
-    showToast("คัดลอกแล้ว");
+    showToast(t("คัดลอกแล้ว"));
   } catch (e) {
-    showToast("คัดลอกไม่สำเร็จ");
+    showToast(t("คัดลอกไม่สำเร็จ"));
   }
 }
 
 async function handleDelete(skill) {
-  const confirmed = window.confirm(`ต้องการลบ "${skill.name}" ใช่หรือไม่?`);
+  const confirmed = window.confirm(t('ต้องการลบ "{name}" ใช่หรือไม่?', {name: skill.name}));
   if (!confirmed) return;
   if (state.editingId === skill.id) {
     exitEditMode();
   }
   await window.SkilltapeStorage.deleteSkill(skill.id);
   await refresh();
-  showToast("ลบแล้ว");
+  showToast(t("ลบแล้ว"));
 }
 
 async function handleSubmit(event) {
@@ -272,11 +272,11 @@ async function handleSubmit(event) {
   const content = els.content.value.trim();
 
   if (!name) {
-    showFormError("กรุณาระบุชื่อ skill");
+    showFormError(t("กรุณาระบุชื่อ skill"));
     return;
   }
   if (!content) {
-    showFormError("กรุณาระบุเนื้อหา skill");
+    showFormError(t("กรุณาระบุเนื้อหา skill"));
     return;
   }
 
@@ -284,7 +284,7 @@ async function handleSubmit(event) {
   state.saving = true;
   const controls = [...els.form.querySelectorAll("input, textarea, select, button")];
   controls.forEach(control => { control.disabled = true; });
-  els.saveBtn.textContent = "กำลังบันทึก…";
+  els.saveBtn.textContent = t("กำลังบันทึก…");
 
   try {
     if (isEditing) {
@@ -294,19 +294,19 @@ async function handleSubmit(event) {
       });
       exitEditMode();
       await refresh();
-      showToast("อัปเดตแล้ว");
+      showToast(t("อัปเดตแล้ว"));
     } else {
       await window.SkilltapeStorage.saveSkill({ name, content });
       exitEditMode();
       await refresh();
-      showToast("บันทึกแล้ว");
+      showToast(t("บันทึกแล้ว"));
     }
   } catch (e) {
-    showFormError(e.message || "บันทึกไม่สำเร็จ");
+    showFormError(t(e.message) || t("บันทึกไม่สำเร็จ"));
   } finally {
     state.saving = false;
     controls.forEach(control => { control.disabled = false; });
-    els.saveBtn.textContent = state.editingId ? "อัปเดต Skill" : "บันทึก Skill";
+    els.saveBtn.textContent = state.editingId ? t("อัปเดต Skill") : t("บันทึก Skill");
   }
 }
 
@@ -340,9 +340,9 @@ async function handleExport() {
     a.remove();
     URL.revokeObjectURL(url);
 
-    showToast("Export สำเร็จ");
+    showToast(t("Export สำเร็จ"));
   } catch (e) {
-    showToast("Export ไม่สำเร็จ");
+    showToast(t("Export ไม่สำเร็จ"));
   }
 }
 
@@ -370,7 +370,7 @@ function cancelImport() {
 
 async function confirmImport(mode) {
   if (!pendingImportFile || importing) return;
-  if (mode === "replace" && !window.confirm("แทนที่ Skills เดิมทั้งหมด? แนะนำให้ Export สำรองข้อมูลก่อน")) return;
+  if (mode === "replace" && !window.confirm(t("แทนที่ Skills เดิมทั้งหมด? แนะนำให้ Export สำรองข้อมูลก่อน"))) return;
   const file = pendingImportFile;
   importing = true;
   document.getElementById("importError").hidden = true;
@@ -388,10 +388,10 @@ async function confirmImport(mode) {
     await refresh();
     pendingImportFile = null;
     document.getElementById("importDialog").close();
-    showToast("Import สำเร็จ");
+    showToast(t("Import สำเร็จ"));
   } catch (e) {
     const error = document.getElementById("importError");
-    error.textContent = e.message || "Import ไม่สำเร็จ";
+    error.textContent = t(e.message) || t("Import ไม่สำเร็จ");
     error.hidden = false;
   } finally {
     importing = false;
@@ -411,7 +411,7 @@ document.getElementById("closePreviewBtn").addEventListener("click", () => docum
 
 document.getElementById("addSkillBtn").addEventListener("click", () => {
   exitEditMode();
-  document.getElementById("editorTitle").textContent = "เพิ่ม Skill";
+  document.getElementById("editorTitle").textContent = t("เพิ่ม Skill");
   document.getElementById("editorDialog").showModal();
   els.name.focus();
 });
@@ -430,8 +430,13 @@ els.importFileInput.addEventListener("change", handleImportFileChange);
 // Keep a detached library up to date without resetting an open editor.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.skills) {
-    return refresh().catch(() => showToast("โหลดรายการไม่สำเร็จ ลองเปิดใหม่"));
+    return refresh().catch(() => showToast(t("โหลดรายการไม่สำเร็จ ลองเปิดใหม่")));
   }
 });
 
-refresh();
+document.addEventListener('languagechange', () => {
+  render();
+  document.getElementById('editorTitle').textContent = t(state.editingId ? 'แก้ไข Skill' : 'เพิ่ม Skill');
+  els.saveBtn.textContent = t(state.saving ? 'กำลังบันทึก…' : state.editingId ? 'อัปเดต Skill' : 'บันทึก Skill');
+});
+refresh().catch(() => showToast(t('โหลดรายการไม่สำเร็จ ลองเปิดใหม่')));

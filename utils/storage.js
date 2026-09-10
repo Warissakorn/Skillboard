@@ -168,6 +168,8 @@ function validateImportShape(data) {
   }
   return data.skills.map((s) => ({
     id: s.id,
+    ...(typeof s.source === "string" && s.source.startsWith("https://github.com/") ? {source:s.source} : {}),
+    ...(s.license === "MIT" ? {license:"MIT"} : {}),
     name: s.name,
     content: s.content,
     category: VALID_CATEGORIES.includes(s.category) ? s.category : "general",

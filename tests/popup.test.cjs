@@ -8,7 +8,7 @@ function setup(){
  function el(id){if(!elements.has(id))elements.set(id,make());return elements.get(id)}
  let db=[], imports=[], writes=0, storageListener;
  const storage={getSkills:async()=>structuredClone(db),saveSkill:async s=>{writes++;db.push({...s,id:'new',updatedAt:2});},updateSkill:async(id,p)=>{db=db.map(s=>s.id===id?{...s,...p}:s)},importJSON:async(text,options)=>{imports.push(options.mode)}};
- const c=vm.createContext({window:{confirm:()=>false,SkilltapeStorage:storage},document:{querySelector:el,getElementById:el,createElement:make,createDocumentFragment:make},chrome:{storage:{onChanged:{addListener(fn){storageListener=fn}}}},console,setTimeout:()=>1,clearTimeout(){}});
+ const c=vm.createContext({t:(key,values={})=>key.replace(/\{(\w+)\}/g,(m,n)=>values[n]??m),window:{confirm:()=>false,SkilltapeStorage:storage},document:{addEventListener(){},querySelector:el,getElementById:el,createElement:make,createDocumentFragment:make},chrome:{storage:{onChanged:{addListener(fn){storageListener=fn}}}},console,setTimeout:()=>1,clearTimeout(){}});
  vm.runInContext(fs.readFileSync('popup/popup.js','utf8').replace(/refresh\(\)(?:\.catch\([^\n]+\))?;\s*$/,''),c);
  return {el,c,storage,imports,run:s=>vm.runInContext(s,c),db:()=>db,writes:()=>writes,seed:v=>{db=v},changed:(changes,area)=>storageListener(changes,area)};
 }

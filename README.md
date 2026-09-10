@@ -235,3 +235,36 @@ zip -r skilltape-v0.1.0.zip . -x "*.test.js" -x ".git/*" -x "*.zip" -x "tests/*"
 อัปโหลดไฟล์ `.zip` ที่ได้ที่
 [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
 (อย่าลืมอัปเดต `version` ใน `manifest.json` ก่อน build ทุกครั้งที่ปล่อยเวอร์ชันใหม่)
+
+## Compact window, languages and starter prompts
+
+- **Window ↗ / หน้าต่าง ↗** opens a 360 × 420 browser window directly in horizontal card mode. The shelf uses the available window height and has no vertical scrolling. The toolbar popup can still switch between list and card layouts. Full readers, editors and the starter picker retain internal vertical scrolling so long text remains accessible.
+- Choose **ไทย / English** in the footer. The first launch follows the browser language (English fallback); subsequent launches use the saved preference. Labels, search, actions, confirmations and application error messages are translated. User prompts are never automatically translated. Add UI translations in `popup/i18n.js`.
+- Open **Starter skills / Skills เริ่มต้น**, preview a prompt and click **Add to library / เพิ่มเข้าคลัง**. Six bundled prompts work offline; no GitHub account, network download or additional extension permission is required. Adding a starter does not replace existing skills. Edited starters are preserved when the catalog is imported again.
+
+| Starter | Purpose | Upstream |
+| --- | --- | --- |
+| grill-me | Question a plan and resolve dependent decisions | mattpocock/skills (grilling; grill-me now delegates to it) |
+| wait-what | Re-explain an unclear answer | mattpocock/skills |
+| code-review | Check standards and requirement coverage separately | mattpocock/skills |
+| systematic-debugging | Investigate root causes before fixes | obra/superpowers |
+| writing-plans | Create concrete implementation steps | obra/superpowers |
+| verification-before-completion | Require evidence before completion claims | obra/superpowers |
+
+These are explicitly labeled **chat-ready adaptations**, not installations of the complete upstream agent plugins. Dependencies on native skill tools, subagents and local support files have been removed. The prompt text is English and asks the AI to respond in the user's language; catalog descriptions support Thai and English. Each prompt includes its pinned upstream source URL and the complete MIT notice, preserved when copied, inserted or exported. See `data/THIRD_PARTY_NOTICES.md` and `data/starter-skills.json` for provenance.
+
+### Verification
+
+Run the dependency-free behavioral tests from the repository root:
+
+```sh
+node --test tests/*.test.cjs
+```
+
+For actual browser layout and integration checks, install Playwright and its Chromium browser in your test environment, then run:
+
+```sh
+node tests/browser-smoke.cjs
+```
+
+The smoke test serves this extension's files locally and mocks Chrome extension APIs. It checks eight viewport/language combinations, starter installation, duplicate prevention, persisted language, editor draft preservation, prompt insertion, attribution export and search. It does not substitute for loading the unpacked extension and checking insertion on real AI websites.
